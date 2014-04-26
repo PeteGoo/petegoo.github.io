@@ -1,4 +1,5 @@
+
 petegoo.com
 ===========
 
-Repository for petegoo.com
+Repository for blog.petegoo.com
