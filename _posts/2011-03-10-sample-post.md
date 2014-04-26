@@ -9,6 +9,7 @@ image:
   feature: texture-feature-05.jpg
   credit: Texture Lovers
   creditlink: http://texturelovers.com
+published: false
 ---
 
 <section id="table-of-contents" class="toc">
