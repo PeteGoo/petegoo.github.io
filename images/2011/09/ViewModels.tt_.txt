@@ -1,0 +1,87 @@
+﻿<#@ template inherits="Microsoft.VisualStudio.TextTemplating.VSHost.ModelingTextTransformation" #>
+<#@ output extension=".cs" #>
+<#@ Language4 processor="Language4DirectiveProcessor" requires="fileName='Test.mydsl4'"  #>
+<#@ assembly name="System.Core"#>
+<#@ import namespace="System.Linq"#>
+<#@ import namespace="System.Text"#>
+using System;
+using System.ComponentModel;
+
+namespace MyViewModels{
+<#
+
+  foreach (ModelClass modelClass in this.ModelRoot.Types.Where(me => me is ModelClass).Cast<ModelClass>()) {
+#>
+public partial class <#=modelClass.Name#> : <#=modelClass.Name#>Base {}
+
+	public class <#=modelClass.Name#>Base : INotifyPropertyChanged {
+
+
+<#
+	foreach(ModelAttribute attribute in modelClass.Attributes){
+#>
+		public virtual <#=attribute.Type#> <#=attribute.Name#> {
+			get{ return <#=ConvertCaseString(attribute.Name, Case.CamelCase)#>; }
+			set{ 
+				<#=ConvertCaseString(attribute.Name, Case.CamelCase)#> = value; 
+				NotifyPropertyChanged("<#=attribute.Name#>");
+			}
+		}
+
+		private <#=attribute.Type#> <#=ConvertCaseString(attribute.Name, Case.CamelCase)#>;
+<#
+	}
+#>
+		
+		public event EventHandler<PropertyChangedEventArgs> PropertyChanged;
+
+		protected virtual void NotifyPropertyChanged(string propertyName) {
+			if(PropertyChanged != null) {
+				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+<#
+  }
+#>
+}
+
+<#+
+/// <summary>
+/// Converts the phrase to specified convention.
+/// </summary>
+/// <param name="phrase"></param>
+/// <param name="cases">The cases.</param>
+/// <returns>string</returns>
+public static string ConvertCaseString(string phrase, Case cases)
+{
+    string[] splittedPhrase = phrase.Split(' ', '-', '.');
+    var sb = new StringBuilder();
+
+    if (cases == Case.CamelCase)
+    {
+        sb.Append(splittedPhrase[0].ToLower());
+        splittedPhrase[0] = string.Empty;
+    }
+    else if (cases == Case.PascalCase)
+        sb = new StringBuilder();
+
+    foreach (String s in splittedPhrase)
+    {
+        char[] splittedPhraseChars = s.ToCharArray();
+        if (splittedPhraseChars.Length > 0)
+        {
+            splittedPhraseChars[0] = ((new String(splittedPhraseChars[0], 1)).ToUpper().ToCharArray())[0];
+        }
+        sb.Append(new String(splittedPhraseChars));
+    }
+    return sb.ToString();
+}
+
+public enum Case
+{
+    PascalCase,
+    CamelCase
+}
+
+#>

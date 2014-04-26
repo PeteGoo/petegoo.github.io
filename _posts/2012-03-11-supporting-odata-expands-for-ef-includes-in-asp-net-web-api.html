@@ -24,8 +24,8 @@ author:
   first_name: Peter
   last_name: Goodman
 ---
-<div class="alert alert-error">Hold Up!!! <a title="Updated sample using an ActionFilter" href="http://blog.petegoo.com/index.php/2012/04/29/action-filter-to-support-odata-expands-as-ef-includes-in-asp-net-web-api/">Please see the updated (and much nicer) implementation using an ActionFilter</a>.</div>
-<p>Following on from my previous post on <a title="Creating a Queryable client for ASP.Net web api oData services" href="http://blog.petegoo.com/index.php/2012/03/11/creating-a-net-queryable-client-for-asp-net-web-api-odata-services/" target="_blank">creating a client API for ASP.Net Web API queryable oData services</a>, I wanted to prove that expand clauses could also work for Entity Framework object sets.</p>
+<div class="alert alert-error">Hold Up!!! <a title="Updated sample using an ActionFilter" href="/index.php/2012/04/29/action-filter-to-support-odata-expands-as-ef-includes-in-asp-net-web-api/">Please see the updated (and much nicer) implementation using an ActionFilter</a>.</div>
+<p>Following on from my previous post on <a title="Creating a Queryable client for ASP.Net web api oData services" href="/index.php/2012/03/11/creating-a-net-queryable-client-for-asp-net-web-api-odata-services/" target="_blank">creating a client API for ASP.Net Web API queryable oData services</a>, I wanted to prove that expand clauses could also work for Entity Framework object sets.</p>
 <p>The <a title="oData expand" href="http://www.odata.org/developers/protocols/uri-conventions#ExpandSystemQueryOption" target="_blank">oData URI conventions</a> specifies that the desired depth of an entity can be represented in the $expand query string parameter. When using the ASP.Net Web API we need a way to pull this information from the querystring and convert it into Include statements on the ADO.Net Entity Framework object set. To achieve this I created an extension method that will pull the $expand query string parameter and translate it into multiple Include method calls.</p>
 <pre class="brush: csharp;">public class NorthwindController : ApiController
 {

@@ -25,7 +25,7 @@ author:
 <p>If you are working with Workflow Services (.xamlx) and you want an easy way to see live tracking from your workflow your only out-of-the-box option right now is <a title="Windows Server AppFabric" href="http://msdn.microsoft.com/en-us/windowsserver/ee695849" target="_blank">AppFabric</a> which doesn’t show live data and the UI can be a little slow. The <a title="Workflow Service Tracking Viewer on NuGet" href="http://nuget.org/List/Packages/WorkflowServiceTrackingViewer" target="_blank">Workflow Service Tracking Viewer</a> (beta) uses <a title="SignalR on github" href="https://github.com/SignalR/SignalR" target="_blank">SignalR</a> and a custom tracking participant to serve a web page alongside your workflow endpoint that displays live tracking information as it happens.</p>
 <p>The viewer is available as a <a title="NuGet" href="http://nuget.org/" target="_blank">NuGet</a> package that plugs in to your existing web application projects containing workflow services.</p>
 <p>1. Add the WorkflowServiceTrackingViewer package to your project using <a title="NuGet" href="http://nuget.org/" target="_blank">NuGet</a></p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/10/CropperCapture9.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="CropperCapture[9]" src="http://blog.petegoo.com/wp-content/uploads/2011/10/CropperCapture9_thumb.jpg" alt="CropperCapture[9]" width="404" height="215" border="0" /></a></p>
+<p><a href="/images/2011/10/CropperCapture9.jpg"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border-width: 0px;" title="CropperCapture[9]" src="/images/2011/10/CropperCapture9_thumb.jpg" alt="CropperCapture[9]" width="404" height="215" border="0" /></a></p>
 <p>2. If you have your project hosted in IIS or IIS Express rather than the Visual Studio Development Server then comment out the marked section in the web.config. Otherwise you will get an error when the Web Application starts.</p>
 <pre class="brush: xml;">&lt;?xml version="1.0" encoding="utf-8" ?&gt;
 &lt;configuration&gt;
@@ -39,11 +39,11 @@ author:
     &lt;/httpModules&gt;
 ,.  &lt;/system.web&gt;</pre>
 <p>3. Start the tracking viewer by going to the URI of your web application and adding “/trackingviewer” e.g. for the web application hosted at <a href="http://localhost/Foo/">http://localhost/Foo/</a></p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/10/TrackingViewerEmpty.png"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="TrackingViewerEmpty" src="http://blog.petegoo.com/wp-content/uploads/2011/10/TrackingViewerEmpty_thumb.png" alt="TrackingViewerEmpty" width="454" height="113" border="0" /></a></p>
+<p><a href="/images/2011/10/TrackingViewerEmpty.png"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="TrackingViewerEmpty" src="/images/2011/10/TrackingViewerEmpty_thumb.png" alt="TrackingViewerEmpty" width="454" height="113" border="0" /></a></p>
 <p>4. Start an instance of your workflow service</p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/10/wcfTestClient.png"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="wcfTestClient" src="http://blog.petegoo.com/wp-content/uploads/2011/10/wcfTestClient_thumb.png" alt="wcfTestClient" width="454" height="289" border="0" /></a></p>
+<p><a href="/images/2011/10/wcfTestClient.png"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="wcfTestClient" src="/images/2011/10/wcfTestClient_thumb.png" alt="wcfTestClient" width="454" height="289" border="0" /></a></p>
 <p>5. The workflow tracking data should now appear in the browser window</p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/10/trackingviewer.png"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="trackingviewer" src="http://blog.petegoo.com/wp-content/uploads/2011/10/trackingviewer_thumb.png" alt="trackingviewer" width="454" height="220" border="0" /></a></p>
+<p><a href="/images/2011/10/trackingviewer.png"><img style="background-image: none; padding-left: 0px; padding-right: 0px; display: inline; padding-top: 0px; border: 0px;" title="trackingviewer" src="/images/2011/10/trackingviewer_thumb.png" alt="trackingviewer" width="454" height="220" border="0" /></a></p>
 <p>&nbsp;</p>
 <p><strong>Known Issues</strong></p>
 <p>1. After applying and clearing a filter the grid is no longer the full length of the page.</p>
@@ -51,4 +51,4 @@ author:
 <p>3. When hosting in IIS on Win 7 the maximum connections to the tracking viewer is 2.</p>
 <p>This seems to be related to the maximum connection for IIS as it affects any SignalR project</p>
 <div>The source is available on <a href="https://github.com/PeteGoo/Workflow-Service-Tracking-Viewer" title="GitHub" target="_blank">GitHub</a>.</div>
-<div class="xdownload"><a title="Sample Project" href="http://blog.petegoo.com/wp-content/uploads/2011/10/TrackingSample.zip">Sample Project</a></div>
+<div class="xdownload"><a title="Sample Project" href="/images/2011/10/TrackingSample.zip">Sample Project</a></div>

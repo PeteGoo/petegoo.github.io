@@ -25,7 +25,7 @@ author:
 <p>So I set myself a challenge, I wanted to use Rx to create an auto-complete WPF control with some of the major use cases I have seen in these types of controls.</p>
 <h3>The App Shell</h3>
 <p>First thing I was going to need was a WPF application with a MainWindow that would hold my text box, the results and a log window.</p>
-<p>&#160;<a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture1.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[1]" border="0" alt="CropperCapture[1]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture1_thumb.jpg" width="478" height="320" /></a></p>
+<p>&#160;<a href="/images/2011/11/CropperCapture1.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[1]" border="0" alt="CropperCapture[1]" src="/images/2011/11/CropperCapture1_thumb.jpg" width="478" height="320" /></a></p>
 <p>The XAML looks something like this:</p>
 <pre class="brush: xml;">&lt;Window
     x:Class=&quot;AutoCompleteWithRx.MainWindow&quot;
@@ -144,7 +144,7 @@ author:
 <p>The next line transforms the type of the events in our IObservable from <a title="PropertyChangeEventsArgs" href="http://msdn.microsoft.com/en-us/library/system.componentmodel.propertychangedeventargs.aspx" target="_blank">PropertyChangeEventsArgs</a> to string, the content of the textbox. Much more useful.</p>
 <p>Finally we need to subscribe to the event stream and do something with the string, firstly though we tell the subscription that we want to observe the events on the WPF dispatcher (This helper singleton comes from the Rx-WPF package). Then we simply provide an inline function to execute for each event, in our case inserting into the log stack which our LogOutput list box is bound to.</p>
 <p>The result looks like this.</p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture2.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[2]" border="0" alt="CropperCapture[2]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture2_thumb.jpg" width="521" height="286" /></a></p>
+<p><a href="/images/2011/11/CropperCapture2.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[2]" border="0" alt="CropperCapture[2]" src="/images/2011/11/CropperCapture2_thumb.jpg" width="521" height="286" /></a></p>
 <p>OK. So far so good. Now let’s add an actual search to the mix.</p>
 <h3>Chaining the Asynchronous Search</h3>
 <p>Before I add my search function I want to create a structure that will encapsulate the search term and it’s result.</p>
@@ -186,7 +186,7 @@ results.ObserveOn(DispatcherScheduler.Instance)
 <p align="left">Here we firstly call <a title="Run a method asynchronously on demand" href="http://rxwiki.wikidot.com/101samples#toc2" target="_blank">ToAsync</a>, this will create a function that takes a string (our search term) and returns an Observable that will only ever produce one event (the Completed / End) and then close.</p>
 <p align="left">We chain the incoming input stream with the result of the search function using <a href="http://msdn.microsoft.com/en-us/library/bb308959.aspx#linqoverview_topic5" target="_blank">simplified LINQ syntax</a> and produce a new observable of SearchResult. We then observe the result, logging and updating the autocomplete items.</p>
 <p>The result is this:</p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture4.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[4]" border="0" alt="CropperCapture[4]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture4_thumb.jpg" width="477" height="302" /></a></p>
+<p><a href="/images/2011/11/CropperCapture4.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[4]" border="0" alt="CropperCapture[4]" src="/images/2011/11/CropperCapture4_thumb.jpg" width="477" height="302" /></a></p>
 <p>OK. So this is round about where my mind exploded and grey matter started to leak out of my ears. Basically what is happening is we are treating these incoming events as collections before they actually happen, then we can manipulate them using LINQ and even chain the events much like pipelining in UNIX / Powershell.</p>
 <p>We’re not done yet. We still have a number of issues.</p>
 <h3>Using Throttle to enforce an idle period before searching</h3>
@@ -196,7 +196,7 @@ results.ObserveOn(DispatcherScheduler.Instance)
     .Throttle(TimeSpan.FromMilliseconds(400))
     .Select(args =&gt; SearchText);</pre>
 <p align="left">Now if we test we should get something like the following:</p>
-<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture5.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[5]" border="0" alt="CropperCapture[5]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture5_thumb.jpg" width="428" height="182" /></a></p>
+<p><a href="/images/2011/11/CropperCapture5.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[5]" border="0" alt="CropperCapture[5]" src="/images/2011/11/CropperCapture5_thumb.jpg" width="428" height="182" /></a></p>
 <p>That was too easy.</p>
 <h3>Merging two event streams</h3>
 <p>The next requirement was that I may want a larger throttle timeout for strings of less than 3 characters as people tend to type slower at the start of a search. To do this I needed to split my input stream into two different event streams that could be throttled differently.</p>
@@ -367,7 +367,7 @@ results.ObserveOn(DispatcherScheduler.Instance)
 <p></p>
 <div class="xdownload">
 <div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:F60BB8FA-6F02-4999-8F5E-9DD4E92C4DA7:fc7f2917-f963-4fbb-b889-f5b061331d26" class="wlWriterEditableSmartContent">
-<div><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/AutoCompleteBlog.zip" target="_self">AutoCompleteBlog.zip</a></div>
+<div><a href="/images/2011/11/AutoCompleteBlog.zip" target="_self">AutoCompleteBlog.zip</a></div>
 </div></div>
 </li>
 </ul>

@@ -22,7 +22,7 @@ author:
   first_name: Peter
   last_name: Goodman
 ---
-<p>Back in March <a href="http://blog.petegoo.com/index.php/2012/03/11/supporting-odata-expands-for-ef-includes-in-asp-net-web-api/" target="_blank">I wrote a quick howto</a> on supporting $expand for entities in ASP.Net Web API. That method used an extension method to pull the $expand clause out of the query string an apply it to the ObjectSet.</p>
+<p>Back in March <a href="/index.php/2012/03/11/supporting-odata-expands-for-ef-includes-in-asp-net-web-api/" target="_blank">I wrote a quick howto</a> on supporting $expand for entities in ASP.Net Web API. That method used an extension method to pull the $expand clause out of the query string an apply it to the ObjectSet.</p>
 <p>I’ve now added to that sample an <a href="http://msdn.microsoft.com/en-us/library/system.web.http.filters.actionfilterattribute(v=vs.108).aspx" target="_blank">ActionFilter</a> which will do this for you without any code in your controller.</p>
 <p>To use it, change your global.asax and add the ActionFilter as part of your configuration.</p>
 <pre>

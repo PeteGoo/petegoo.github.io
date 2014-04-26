@@ -14,6 +14,8 @@ tags:
 status: publish
 type: post
 published: true
+redirect_from: 
+  - index.php/2013/10/13/introducing-mmbot-a-c-hubot-port/
 meta:
   _wpas_done_all: '1'
 author:
@@ -22,6 +24,7 @@ author:
   display_name: PeteGoo
   first_name: Peter
   last_name: Goodman
+
 ---
 <p>I’ve been playing recently with github’s <a href="http://github.com/github/hubot" target="_blank">Hubot</a> chat bot, written in Coffee script on Node. I wanted to connect it to our <a href="http://about.jabbr.net" target="_blank">jabbr</a> instance with the least amount of friction and to provide our team with an office jukebox, build automation and various meme-oriented distractions. There is a <a href="https://github.com/smoak/hubot-jabbr" target="_blank">pretty good adapter</a> for Hubot to do this but after having a few issues I decided it might be easier to do a port to C# so I could more easily write scripts and connect to jabbr (which is written in C# and has some ready made APIs).</p>
 <p>The result is <a href="http://github.com/petegoo/mmbot" target="_blank">mmbot</a>, a hubot port that follows the same basic architecture of Hubot with minimal changes. The basic goals of mmbot are thusly:</p>

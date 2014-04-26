@@ -36,13 +36,13 @@ author:
     <span style="color: blue">protected override void </span>Track(<span style="color: #2b91af">TrackingRecord </span>record, <span style="color: #2b91af">TimeSpan </span>timeout) {
         testContext.WriteLine(<span style="color: blue">string</span>.Format(<span style="color: #a31515">"- {0}"</span>, 
             record.ToString()
-            .Replace(<span style="color: #a31515">"{"</span>, <span style="color: #a31515">"&#123;&#123;</span>)
+            .Replace(<span style="color: #a31515">"{"</span>, <span style="color: #a31515">"&#123;&#123;"</span>)
             .Replace(<span style="color: #a31515">"}"</span>, <span style="color: #a31515">"}}"</span>)));
     }
 }
 </font></pre>
 <p> </p>
-<p>The only issue is that our invoker code from the <a title="Unit Testing Basics" href="http://blog.petegoo.com/archive/2010/08/16/unit-testing-workflow-4-activities-basics.aspx" target="_blank">previous post</a> is a little more verbose.</p>
+<p>The only issue is that our invoker code from the <a title="Unit Testing Basics" href="/archive/2010/08/16/unit-testing-workflow-4-activities-basics.aspx" target="_blank">previous post</a> is a little more verbose.</p>
 <pre class="code"><font size="2">[<span style="color: #2b91af">TestMethod</span>]
 <span style="color: blue">public void </span>ExecuteConvertsTimeToTargetCity() {
 
