@@ -36,7 +36,7 @@ author:
     <span style="color: blue">protected override void </span>Track(<span style="color: #2b91af">TrackingRecord </span>record, <span style="color: #2b91af">TimeSpan </span>timeout) {
         testContext.WriteLine(<span style="color: blue">string</span>.Format(<span style="color: #a31515">"- {0}"</span>, 
             record.ToString()
-            .Replace(<span style="color: #a31515">"{"</span>, <span style="color: #a31515">"{{"</span>)
+            .Replace(<span style="color: #a31515">"{"</span>, <span style="color: #a31515">"&#123;&#123;</span>)
             .Replace(<span style="color: #a31515">"}"</span>, <span style="color: #a31515">"}}"</span>)));
     }
 }
