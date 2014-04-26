@@ -1,0 +1,51 @@
+---
+layout: post
+title: OData V3 any/all support
+categories:
+- ASP.Net
+- C#
+- ODAta
+- Web API
+tags:
+- ASP.Net
+- Linq2Rest
+- oData
+- Web API
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>WCF Data Services 5 <a href="http://blogs.msdn.com/b/astoriateam/archive/2012/04/09/wcf-data-services-5-0-rtm-release.aspx" target="_blank">has been RTM’d</a> and adds support for a whole bunch of scenarios:</p>
+<ul>
+<li>Any/All </li>
+<li>Actions </li>
+<li>Collections </li>
+<li>Named Streams/Stream Properties </li>
+<li>PATCH Verb </li>
+<li>Prefer Headers </li>
+<li>Properties on Derived Types </li>
+<li>Support for DateTimeOffset and TimeSpan Data Types </li>
+<li>Support for DbContext as the DataService Source </li>
+<li>Spatial </li>
+<li>Vocabularies </li>
+</ul>
+<p>The most interesting bit for me initially was Any/All. Basically this has been one of those things that I get asked from time to time and have to explain that you could not (until now) filter a entity set based on some values in a sub-collection. E.g. give me all the customers who have ordered “x”.</p>
+<p>With the inclusion of Any and All the following code is now possible</p>
+<pre>// http://foo/?filter=Orders/any(o: o/OrderItems/any(i: i.Id eq 5))
+var customers = Customers
+                .Where(c =&gt; 
+                    c.Orders.Any(o =&gt; 
+                        o.OrderItems.Any(i =&gt;     
+                            i.Id == 5));</pre>
+<p>&#160;</p>
+<p>I like the lambda syntax in the URI $filter parameter. It makes it easy for anyone that is used to modern languages to see what is going on.</p>
+<p>So right now you can get <a href="http://blogs.msdn.com/b/astoriateam/archive/2012/04/09/wcf-data-services-5-0-rtm-release.aspx" target="_blank">WCF Data Services 5</a> and start using the Any/All support in OData.</p>
+<p><a href="http://www.reimers.dk/" target="_blank">Jacob Reimers</a> has also gracefully accepted and published my pull request so <a href="http://nuget.org/packages?q=linq2rest" target="_blank">Linq2Rest</a> now fully supports Any/All queries in both the server and client APIs.</p>
+<p>I’ve also <a href="http://aspnetwebstack.codeplex.com/workitem/65" target="_blank">submitted an issue</a> on the ASP.Net Web API for support so please up vote that issue if it’s something that’s important to you. From that issue you can also go see the implementation that I’ve done for my fork of aspnetwebstack that implements server support for Any/All in ASP.Net Web API.</p>

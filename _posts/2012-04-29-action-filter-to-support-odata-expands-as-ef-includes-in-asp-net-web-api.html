@@ -1,0 +1,47 @@
+---
+layout: post
+title: Action Filter to support oData expands as EF includes in ASP.Net Web API
+categories:
+- ASP.Net
+- C#
+- Entity Framework
+- Web API
+tags:
+- ASP.Net
+- Entity Framewok
+- Web API
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Back in March <a href="http://blog.petegoo.com/index.php/2012/03/11/supporting-odata-expands-for-ef-includes-in-asp-net-web-api/" target="_blank">I wrote a quick howto</a> on supporting $expand for entities in ASP.Net Web API. That method used an extension method to pull the $expand clause out of the query string an apply it to the ObjectSet.</p>
+<p>I’ve now added to that sample an <a href="http://msdn.microsoft.com/en-us/library/system.web.http.filters.actionfilterattribute(v=vs.108).aspx" target="_blank">ActionFilter</a> which will do this for you without any code in your controller.</p>
+<p>To use it, change your global.asax and add the ActionFilter as part of your configuration.</p>
+<pre>
+public static void RegisterRoutes(RouteCollection routes) {
+    ...
+    ...
+
+    HttpConfiguration configuration = GlobalConfiguration.Configuration;
+    configuration.Filters.Add(new EFExpandActionFilter());
+
+    ...
+    ... 
+    ...
+}</pre>
+<p>&#160;</p>
+<p>Now your api methods need only return an ObjectSet or ObjectQuery without any extension methods.</p>
+<pre>
+public IQueryable&lt;Customer&gt; GetCustomers() {
+    return northwindEntities.Customers;
+}</pre>
+<p>Note that if you are using the default XML serializer you will find that the navigation properties do not serialize due to the XmlIgnore attribute, either customize your entities or use Json.Net (as in the sample project)</p>
+<div class="alert alert-info"><strong>Download:</strong> <a href="https://github.com/PeteGoo/WebApiContext.Sample/commit/fadfe3649a95c36ac2b9d74d63054ff62cd89f3a" target="_blank">Source is on github</a>.</div>

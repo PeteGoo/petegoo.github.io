@@ -1,0 +1,23 @@
+---
+layout: post
+title: WCF Collections with Payload via Surrogates
+categories: []
+tags:
+- Serialization
+- WCF
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p><a href="http://blog.petegoo.com/archive/2007/10/31/wcf-custom-collections-with-extra-payload.aspx" target="_blank">Previously</a> I posted about the problem with WCF and collection which have a payload in them. I came across this problem again when using the DataContractJsonSerializer and thought I would look at possibilities to resolve it.</p>
+<p>If you have implemented the IXmlSerializable interface then you are kind of stuffed because the Json serializer will emit json with a bunch of xml in the middle….nice! It is really useful to reference <a href="http://blogs.msdn.com/sowmy/archive/2006/02/22/536747.aspx" target="_blank">sowmy’s post</a> on the precedence of serializable classes in the Data Contract family of serializers.</p>
+<p>Instead you can use a Surrogate. This is a class which implements <a title="IDataContractSurrogate on MSDN" href="http://msdn.microsoft.com/en-us/library/system.runtime.serialization.idatacontractsurrogate.aspx" target="_blank">IDataContractSurrogate</a> and can be passed to the constructor of the serializer. It tells the serializer that when you come to serialize type <strong><em>x</em></strong>, instead use type <strong><em>y</em></strong> and I will give you the converted instance. At the other end the class gets deserialized into the original type and all is good. </p>
+<p>For our custom collection with payload this works great. It will <strong>not</strong> however work with CLR types like DateTime, the precedence of WCF serialization kicks in before the surrogate provider is queried for a transmission type.</p>

@@ -1,0 +1,68 @@
+---
+layout: post
+title: Slides and Code for Visual Studio eXtensibility, DSL and T4
+categories:
+- DSL
+- T4
+- Visual Studio
+- VSX
+tags:
+- DSL Tools
+- T4
+- Visual Studio
+- VSX
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Here are the slides and the code for the talk on VSX, DSLs and T4 that I did in the North Shore and Auckland .Net User Groups.</p>
+<p><strong>Snippets</strong></p>
+<p>For snippets I used the <a title="Snippet Designer on Visual Studio Galler" href="http://visualstudiogallery.msdn.microsoft.com/B08B0375-139E-41D7-AF9B-FAEE50F68392" target="_blank">Snippet Designer on Visual Studio Gallery</a>. The code for that template is attached below.</p>
+<p>I also talked about using Resharper Live Templates, there is some pretty good documentation <a title="Resharper live templates" href="http://www.jetbrains.com/resharper/webhelp/Templates__Creating_and_Editing_Templates__Creating_a_Template.html" target="_blank">here</a>.</p>
+<p><strong>Macros</strong></p>
+<p>We talked about macros and here they are:</p>
+<p>Create a Guid. This macro will insert a new guid at the cursor location. We mapped this to a keyboard command (Alt+G) with the Tools-&gt;Options-&gt;Keyboard menu in VS.</p>
+<pre class="brush: vb;">Sub Create_GUID()
+    DTE.ActiveDocument.Selection.Text = System.Guid.NewGuid().ToString(&quot;D&quot;).ToUpper()
+End Sub</pre>
+<p>&#160;</p>
+<p>Copy Files to Drop. This macro will copy the output of the selected project to a drop folder.</p>
+<pre class="brush: vb;">Sub CopyFilesToDrop()
+    For Each selectedItem As SelectedItem In DTE.SelectedItems
+        If (selectedItem.Project IsNot Nothing) Then
+            Dim project As Project = CType(selectedItem.Project, Project)
+            Dim fullProjectPath As String = project.Properties.Item(&quot;FullPath&quot;).Value.ToString()
+            Dim fileName As String = project.Properties.Item(&quot;OutputFilename&quot;).Value
+            Dim outputPath As String = project.ConfigurationManager.ActiveConfiguration.Properties.Item(&quot;OutputPath&quot;).Value
+            Dim outputFile As String = System.IO.Path.Combine(fullProjectPath, outputPath, fileName)
+            System.IO.File.Copy(outputFile, System.IO.Path.Combine(&quot;c:\drop&quot;, fileName), True)
+        End If
+    Next
+End Sub</pre>
+<p>&#160;</p>
+<p><strong>Custom Designer</strong></p>
+<p>One of the things that became apparent when I was preparing this talk was how many designers in Visual Studio are simply a designer over an XML file, DSLs, Resx designer, project properties. A good sample for creating your own is the <a title="Designer over XML sample on Visual Studio code gallery" href="http://code.msdn.microsoft.com/Designer-View-Over-XML-20a81f17" target="_blank">Designer over XML sample on Visual Studio code gallery</a>.</p>
+<p><strong>DSL Tools</strong></p>
+<p>When we looked at DSL Tools for Visual Studio we simply took the Class Designer example that ships once you have installed the <a title="Visual Studio SDK" href="http://www.microsoft.com/download/en/details.aspx?id=21835" target="_blank">Visual Studio SDK</a> and the <a title="Visualization and Modeling SDK" href="http://archive.msdn.microsoft.com/vsvmsdk" target="_blank">Visualization and Modeling SDK</a>. If you want to save yourself some time look at getting the <a title="Domain Specific Development with Visual Studio DSL Tools" href="http://www.domainspecificdevelopment.com/" target="_blank">awesome book</a> written by the team that made the tools.</p>
+<p><strong>T4</strong></p>
+<p>We then created a tt file that would generate viewmodel code that implemented NotifyPropertyChanged form the class designer dsl implementation. THe whole DSL project is attached below. Simply install the VS SDK and the Visualization and Modeling SDK, open the project, hit the transform all templates button in solution explorer and hit CTRL+F5. This will open the debugging project where you can see the output of the ViewModels.tt file. Right click the file and run the custom tool to regenerate the output.</p>
+<p>&#160;</p>
+<div class="xdownload">
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:29c1719a-8a5d-48c5-a738-e4a0751f0905" class="wlWriterEditableSmartContent">
+<p>Download the <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/Visual-Studio-Extensibility-DSL-Tools-and-T42.pptx" target="_blank">Slides</a></p>
+</div>
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:361fd3b3-741d-4733-9410-38f0ad561cc5" class="wlWriterEditableSmartContent">
+<p>Download the <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/SnippetFile1.snippet.txt" target="_blank">snippet</a></p>
+</div>
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:65208993-bb57-4dc4-a94b-9127a6fea3c6" class="wlWriterEditableSmartContent">
+<p>Download the <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/Language4.zip" target="_blank">DSL Project with T4 Text Template</a></p>
+</div>
+</div>

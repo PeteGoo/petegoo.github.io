@@ -1,0 +1,42 @@
+---
+layout: post
+title: More efficient file enumeration in .Net 4
+categories:
+- C#
+- Programming
+tags:
+- .Net
+- BCL
+- C#
+- File System
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>This may be basics to some people but I thought it was worth mentioning. I was writing some simple code recently to compare the files in a remote directory with those in a local directory to determined if the remote was newer in any way. This seemed like a really simple problem so I made my first stab at it.</p>
+<pre class="brush: csharp;">return (from remoteFile in Directory.GetFiles(remotePath)
+        join localFile in Directory.GetFiles(localPath) 
+            on Path.GetFileName(remoteFile) equals Path.GetFileName(localFile)
+        where File.GetLastWriteTimeUtc(remotePath) &gt; File.GetLastWriteTimeUtc(localPath)
+        select remoteFile).Any();</pre>
+<p>&#160;</p>
+<p>It became very apparent that there were some performance issues when running this code, especially when the remote location introduces any form of latency. The first issue is with Directory.GetFiles, if you actually reflect this method you will see that it ultimately calls the following:</p>
+<pre class="brush: csharp;">return new List&lt;string&gt;(FileSystemEnumerableFactory.CreateFileNameIterator(path, userPathOriginal, searchPattern, includeFiles, includeDirs, searchOption)).ToArray();</pre>
+<p>The existence of the ToArray means the full file list will be enumerated before the method returns, however we only care if any file has changed so it would be better if we had an enumerator so we could exit early when the first newer file is found. This is also true when performing the join as this will enumerate the joined collection first before enumerating the full original collection of remote files and then joining them.</p>
+<p>We could solve the above issues using the new <a title="Directory.EnumerateFiles on MSDN" href="http://msdn.microsoft.com/en-us/library/system.io.directory.enumeratefiles.aspx" target="_blank">Directory.EnumerateFiles</a> method which will return an enumerator that will yield each file as it is enumerated. We could also get rid of the join and enumerate all the local files first before in a separate operation to allow the more expensive remote enumeration happen in sequence.</p>
+<p>The next problem in the original attempt is that we are returning to the remote files to call another operation to evaluate the last write time stamp on the file metadata. This requires us to return to the remote file system and incur the same latency per file. I originally tried to solve this problem using the <a href="http://www.codeproject.com/KB/files/FastDirectoryEnumerator.aspx?msg=3218547" target="_blank">Fast Directory Enumerator on code project</a> which allowed me to enumerate the list of remote files at the same time as retrieving the file info, thus removing the need to return to the scene of the crime. This seemed to work ok but I was having an issue with it not completing the remote file enumeration sequence and discovered that there is actually an implementation introduced in .Net 4. The very well hidden <a title="DirectoryInfo.EnumerateFiles on MSDN" href="http://msdn.microsoft.com/en-us/library/system.io.directoryinfo.enumeratefiles.aspx" target="_blank">EnumerateFiles</a> on DirectoryInfo was the answer.</p>
+<pre class="brush: csharp;">var localFiles = new DirectoryInfo(localPath).GetFiles();
+
+return new DirectoryInfo(remotePath).EnumerateFiles()
+    .Any(remoteFile =&gt; (from localFile in localFiles
+                        where localFile.Name == remoteFile.Name 
+                        &amp;&amp; remoteFile.LastWriteTimeUtc &gt; localFile.LastWriteTimeUtc
+                        select remoteFile).Any());</pre>
+<p>Notice the remote files retrieval now uses the EnumerateFiles method on DirectoryInfo. This allows us to exit when the first item matches the condition in the Any clause.</p>

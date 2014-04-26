@@ -1,0 +1,58 @@
+---
+layout: post
+title: Introducing mmbot, a C# Hubot port
+categories:
+- C#
+- Main Page
+- OSS
+tags:
+- bot
+- github
+- hubot
+- jabbr
+- mmbot
+status: publish
+type: post
+published: true
+meta:
+  _wpas_done_all: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I’ve been playing recently with github’s <a href="http://github.com/github/hubot" target="_blank">Hubot</a> chat bot, written in Coffee script on Node. I wanted to connect it to our <a href="http://about.jabbr.net" target="_blank">jabbr</a> instance with the least amount of friction and to provide our team with an office jukebox, build automation and various meme-oriented distractions. There is a <a href="https://github.com/smoak/hubot-jabbr" target="_blank">pretty good adapter</a> for Hubot to do this but after having a few issues I decided it might be easier to do a port to C# so I could more easily write scripts and connect to jabbr (which is written in C# and has some ready made APIs).</p>
+<p>The result is <a href="http://github.com/petegoo/mmbot" target="_blank">mmbot</a>, a hubot port that follows the same basic architecture of Hubot with minimal changes. The basic goals of mmbot are thusly:</p>
+<ol>
+<li><strong>Provide a chat bot written in C# with all the functionality of Hubot but with a script environment more familiar to .Net devs.</strong>
+<li><strong>Hubot scripts should be easy to convert into mmbot scripts.<br></strong>This may mean that there are some weird overloads in the API for writing scripts that look like hubot scripts but it should still be very usable, customizable and familiar to .Net devs.
+<li><strong>ScriptCS style scripts should be automatically picked up and run from a scripts folder</strong>
+<li><strong>Hubot scripts should be easy to convert into mmbot scripts.<br></strong>There are some blockers here in the NuGet package resolution and <a href="https://github.com/scriptcs/scriptcs/issues/243">dynamic loading of scripts</a></li>
+</ol>
+<p>Currently there are 2 adapters for mmbot - jabbr and HipChat. The jabbr adapter is the most used at the moment but the HipChat one should also be working.</p>
+<p>Scripts can be written in code by implementing IMMBotScript or by dropping a scriptcs csx file into a scripts folder beside the executable. The pre-compiled approach gives you the power of async/await and the speed of using dynamic while scriptcs means you don’t need to create dll. The experience of porting Hubot scripts has so far been pretty painless as the API was designed to make this process incredibly easy.</p>
+<p>Here is the hubot math script in scriptcs form</p>
+<p><script src="https://gist.github.com/PeteGoo/6956172.js"></script>
+<p>And as an IMMBot script</p>
+<p><script src="https://gist.github.com/PeteGoo/6956182.js"></script>
+<p>Notice that there is an Http fluent style helper for creating requests and processing the responses using HttpClient and Json.Net.</p>
+<h2>Starting mmbot</h2>
+<p>Starting mmbot is easy. You can choose to configure him by environment variables or by passing in config parameters in code</p>
+<p><script src="https://gist.github.com/PeteGoo/6956204.js"></script><br />
+<h2>What scripts does it have?</h2>
+<p>mmbot currently has the following scripts</p>
+<ul>
+<li>Searching for images, animated gifs, cats, pugs, maps, youtube videos</li>
+<li>Urban Dictionary definitions</li>
+<li>Ascii art generator</li>
+<li>Mustache me (place a mustache on someone’s face)</li>
+<li>Xkcd comics</li>
+<li>Spotify player /office jukebox with playlist, query, album, track playing and queuing and volume control.</li>
+<li>Jetbrains TeamCity build server – querying build status, starting builds etc.</li>
+</ul>
+<p>Thanks to <a href="http://dkdevelopment.net" target="_blank">Damian Karzon</a> for contributing some of the scripts. Check out the current catalog at <a href="http://github.com/petegoo/mmbot">http://github.com/petegoo/mmbot</a></p>
+<h2>What's next?</h2>
+<p>Next for mmbot is to try to implement a few cooler features like loading and saving scripts from gists, starting from scriptcs (some issues here currently) and to get the script catalog expanded.</p>
+<p><a href="http://github.com/petegoo/mmbot" target="_blank">Go check out the mmbot code on github</a>.</p>

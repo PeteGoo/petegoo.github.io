@@ -1,0 +1,48 @@
+---
+layout: post
+title: Building an Enterprise Workflow system with WF4
+categories:
+- Programming
+- Visual Studio
+- WF4
+tags:
+- WF
+- WF4
+- Workflow
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Recently <a title="Stefan Sewell" href="http://web.me.com/stefsewell/TechEd2010/" target="_blank">Stef</a> and I presented the session “Hardcore Workflow” at Tech-Ed New Zealand in which I gave a demo of how to create your own enterprise workflow system in WF4. I had been deliberating for a while on whether I should reveal a lot of the techniques we used but I came to the conclusion that they are all just standard features in WF4 and they don’t seem to be well documented anywhere. Therefore I thought it was important to document just how easy it can be to get started creating your own enterprise workflow solution.</p>
+<h3>WF4?</h3>
+<p>If you are new to WF4, it is Workflow Foundation 4 supplied by Microsoft free as part of the .Net Framework. I am going to presume that you have some knowledge of WF4 and have tried to create a workflow service.</p>
+<h3>Enterprise Workflow?</h3>
+<p>To me the term “Enterprise Workflow” represents a system which has the goals of allowing end users (or at least power users) to be able to design and create their own business processes using declarative authoring tools that coordinate people and integrate with their business systems and to have those processes hosted in a reliable, scalable way. </p>
+<p>There are companies that exclusively make complex software solutions to perform this task, what I want to show you is that WF4 gives you the keys to create your own solution but by no means will I be able to show you how to solve all the problems in this space.</p>
+<p>Taking this into account I believe the system we are going to build should have the following characteristics:</p>
+<ul>
+<li>Simple visual authoring experience </li>
+<li>Concerns like Persistence, Tracking, Scalability, Correlation, Service Hosting etc should come for free, authors should not have to think about it </li>
+<li>Activities should be supplied to enable integration with business systems and human participants. </li>
+</ul>
+<h3>The Series</h3>
+<p>So I’m going to break this demo down into a series of posts. These will probably look like the following, I’ll fill in the links as I write the posts.</p>
+<ul>
+<li><a href="http://blog.petegoo.com/index.php/2011/09/03/activities-vs-wf-services-in-search-of-the-ideal-authoring-experience/" target="_blank">Activities vs WF Services: In search of the ideal authoring experience</a> </li>
+<li><a href="http://blog.petegoo.com/index.php/2011/09/07/hosting-an-activity-as-a-service-using-the-workflowservicehostfactory/" target="_blank">Hosting an Activity as a Service using the WorkflowServiceHostFactory</a> </li>
+<li><a title="Starting WF Instances using the Creation Endpoint" href="http://blog.petegoo.com/index.php/2011/09/19/starting-wf-instances-using-the-creation-endpoint/" target="_blank">Starting WF Instances using the Creation Endpoint</a> </li>
+<li><a href="http://blog.petegoo.com/index.php/2011/09/23/responding-to-wf-completion-using-the-creation-context/" target="_blank">Responding to WF completion using the Creation Context</a> </li>
+</ul>
+<ul></ul>
+<div class="xdownload">
+<div style="padding-bottom: 0px; border-right-width: 1px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; border-top-width: 1px; border-bottom-width: 1px; border-left-width: 1px; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:7112bb3d-3a91-4f1e-b688-368c61bf308d" class="wlWriterSmartContent">
+<p>Download the Code <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/EnterpriseWorkflowDemo1.zip" target="_blank">EnterpriseWorkflowDemo.zip</a></p>
+</p></div>
+</p></div>

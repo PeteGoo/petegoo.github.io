@@ -1,0 +1,89 @@
+---
+layout: post
+title: 'Unit Testing Workflow 4 Activities : Basics'
+categories:
+- C#
+- Main Page
+- Unit Testing
+- Visual Studio
+- WF4
+tags:
+- Unit Testing
+- WF
+- Workflow
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Unit testing workflows became a lot easier in WF4. The basic approach is the same as for normal code classes except for a few differences which we will cover in the posts in this series.</p>
+<p>Lets start off with a simple code activity which will return the time in a given city.</p>
+<pre class="code"><font size="2"><span style="color: blue">public class </span><span style="color: #2b91af">GetCityTime </span>: <span style="color: #2b91af">CodeActivity</span>&lt;<span style="color: #2b91af">DateTime</span>&gt;{
+
+    [<span style="color: #2b91af">RequiredArgument</span>]
+    <span style="color: blue">public </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: blue">string</span>&gt; City { <span style="color: blue">get</span>; <span style="color: blue">set</span>; }
+
+    <span style="color: blue">public </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: #2b91af">DateTime</span>&gt; LocalTime { <span style="color: blue">get</span>; <span style="color: blue">set</span>; }
+
+    <span style="color: blue">protected override </span><span style="color: #2b91af">DateTime </span>Execute(<span style="color: #2b91af">CodeActivityContext </span>context) {
+        <span style="color: blue">string </span>city = City.Get(context);
+
+        <span style="color: #2b91af">TimeZoneInfo </span>timeZoneInfo = GetTimeZoneForCity(city);
+        <span style="color: blue">if </span>(timeZoneInfo == <span style="color: blue">null</span>) {
+            <span style="color: blue">throw new </span><span style="color: #2b91af">ArgumentOutOfRangeException</span>(<span style="color: blue">string</span>.Format(<span style="color: #a31515">"Could not find timezone matching city '{0}'"</span>, city));
+        }
+
+        <span style="color: blue">return </span><span style="color: #2b91af">TimeZoneInfo</span>.ConvertTime(LocalTime == <span style="color: blue">null </span>? <span style="color: #2b91af">DateTime</span>.Now : LocalTime.Get(context), timeZoneInfo);
+    }
+
+    <span style="color: blue">private </span><span style="color: #2b91af">TimeZoneInfo </span>GetTimeZoneForCity(<span style="color: blue">string </span>city) {
+        <span style="color: blue">return </span><span style="color: #2b91af">TimeZoneInfo</span>.GetSystemTimeZones()
+            .Where(
+                timezone =&gt; timezone.DisplayName.ToUpperInvariant().Contains(city.ToUpperInvariant()))
+            .FirstOrDefault();
+
+    }
+}</font></pre>
+<p>So lets start to build our first test. The <a title="WorkflowInvoker on MSDN" href="http://msdn.microsoft.com/en-us/library/system.activities.workflowinvoker.aspx" target="_blank">WorkflowInvoker</a> class allows us to execute a workflow activity in a blocking manner, meaning that it will execute the activity and wait for completion before continuing. We begin by testing that the City argument in indeed a required argument. This is always a good place to start and will make you think about the validations in your activity.</p>
+<pre class="code"><font size="2">[<span style="color: #2b91af">ExpectedException</span>(<span style="color: blue">typeof</span>(<span style="color: #2b91af">ArgumentException</span>))]
+[<span style="color: #2b91af">TestMethod</span>]
+<span style="color: blue">public void </span>CityIsARequiredArgument() {
+    <span style="color: #2b91af">WorkflowInvoker</span>.Invoke(<span style="color: blue">new </span><span style="color: #2b91af">GetCityTime</span>());
+}
+</font></pre>
+<p> </p>
+<p>Next we are going to check that providing an invalid value for City will indeed throw an exception.</p>
+<pre class="code"><font size="2">[<span style="color: #2b91af">ExpectedException</span>(<span style="color: blue">typeof</span>(<span style="color: #2b91af">ArgumentOutOfRangeException</span>))]
+[<span style="color: #2b91af">TestMethod</span>]
+<span style="color: blue">public void </span>InvalidCityThrowsArgumentException() {
+    <span style="color: #2b91af">WorkflowInvoker</span>.Invoke(<span style="color: blue">new </span><span style="color: #2b91af">GetCityTime</span>() {City = <span style="color: #a31515">"BlaBlaBla"</span>});
+}
+</font></pre>
+<p>The last test is to check the actual execution. A handy feature of the WorkflowInvoker generic static methods are that you can execute an Activity&lt;T&gt; and the return signature of the WorkflowInvoker.Invoke method will be the Result type of our Activity (T).</p>
+<pre class="code"><font size="2">[<span style="color: #2b91af">TestMethod</span>]
+<span style="color: blue">public void </span>ExecuteConvertsTimeToTargetCity() {
+    <span style="color: #2b91af">DateTime </span>currentLocalTime = <span style="color: #2b91af">DateTime</span>.Now;
+    <span style="color: blue">string </span>cityName = <span style="color: #a31515">"London"</span>;
+
+    <span style="color: #2b91af">TimeZoneInfo </span>timeZoneInfo =
+        <span style="color: #2b91af">TimeZoneInfo</span>.GetSystemTimeZones().Where(
+            timeZone =&gt; timeZone.DisplayName.ToUpperInvariant().Contains(cityName.ToUpperInvariant())).First();
+
+    <span style="color: #2b91af">DateTime </span>result = <span style="color: #2b91af">WorkflowInvoker</span>.Invoke(<span style="color: blue">new </span><span style="color: #2b91af">GetCityTime</span>() {
+                                                          City = cityName,
+                                                          LocalTime = <span style="color: blue">new </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: #2b91af">DateTime</span>&gt;(currentLocalTime)
+                                                      });
+    <span style="color: #2b91af">Assert</span>.AreEqual(<span style="color: #2b91af">TimeZoneInfo</span>.ConvertTime(currentLocalTime, timeZoneInfo), result);
+}
+</font></pre>
+<p> </p>
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:F60BB8FA-6F02-4999-8F5E-9DD4E92C4DA7:231146bc-bf73-4d5f-bd7e-83d8ef9f85c2" class="wlWriterEditableSmartContent">
+<div><a href="http://blog.petegoo.com/images/blog_petegoo_com/WindowsLiveWriter/UnitTestingWorkflow4Activities_1294C/UnitTestingActivities.zip" target="_self">UnitTestingActivities.zip</a></div>
+</div>

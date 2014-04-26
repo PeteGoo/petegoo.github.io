@@ -1,0 +1,46 @@
+---
+layout: post
+title: Creating an NHibernate OData service using ASP.Net Web API Fall Update
+categories:
+- ASP.Net
+- NHibernate
+- WCF
+- Web API
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<h2>NHibernate Query Service</h2>
+<p><br>&nbsp;<br />
+<h3>Overview</h3>
+<p><br>The <a href="http://www.asp.net/vnext" target="_blank">Fall Update</a> to ASP.Net Web API re-implements the OData support from the beta releases. This time it is using the ODataLib libraries from the OData team. Getting it to work with NHibernate however can be a bit of a nightmare. As we’ll see though, it is possible. The code for this article is available on <a href="https://github.com/PeteGoo/NHibernate.QueryService" target="_blank">github</a>.<br><br />
+<h3>Setting up the database</h3>
+<p><br>There is a SQL 2012 backup of the database in the root folder which requires a login "queryservice".<br><br />
+<h3>Implementation</h3>
+<p><br>There are a number of issues to solve out of the box when trying to serve NHibernate objects directly over ASP.Net Web API. <br><br />
+<h4>"You should be using DTOs", they will say</h4>
+<p><br>A lot of people will argue that you should really be serving DTOs instead of your actual model classes over the service boundary. They are normally correct but as this is the query side of a sort of CQRS implementation, my concerns are different. I actually just want to serve queryable data to the client.<br><br />
+<h4>&nbsp;</h4>
+<h4>Providing an NHibernate session</h4>
+<p><br>To execute any command in Nhibernate the API call must be made in the context of "Session". This session represents the lifetime of the database connection and the first level cache of retrieved objects and their change tracking.</p>
+<p>We could just construct our session in our controller action but that would involve some boilerplate repetition. Another issue is that, due to the compositional nature of action filters and hence the Web API OData implementation, we need the session to survive beyond the lifetime of the action method so that it can service the late bound evaluation of LINQ operators like Where and Expand.</p>
+<p>To solve this issue the web api sample here uses constructor based dependency injection and <a href="http://www.ninject.org/" target="_blank">Ninject</a> to pass the session to the api controller and dispose of it when the request is complete. using an override of the Dispose method on the controller.</p>
+<h4>Serialization of Dynamic Proxies</h4>
+<p><br>NHibernate uses dynamic proxy types which are derived versions of model types, generated at runtime. When code tries to evaluate any properties on instances of these types, commands will be issued to the database in order to lazily fetch the data to populate the instance. </p>
+<p>This lazy loading means that any serializer will cause the endless fetching of all data related to an entity regardless of whether it was requested or not.</p>
+<p>To solve this issue for the <a href="http://json.codeplex.com" target="_blank">JSON.Net</a> serializer we use a ContractResolver to serialize the dynamic proxy class as if it were its base type. We then use a custom JsonConverter to write null out for any proxy instance or an uninitialized collection, the collection equivalent of the dynamic proxy.<br></p>
+<h4>Processing the $expand OData operator</h4>
+<p><br>The $expand operator allows the requester to specify the depth of the data that they want retrieved. This is equivalent to the Include operator in Entity Framework and the NHibernate LINQ equivalent is Fetch. To implement this the sample uses an Action Filter which will run its Executed method after the Web API OData action filters. In this it will apply any expands directives and force the enumeration of the results.</p>
+<p>Unfortunately the ASP.Net Web API throws an exception when an $expand querystring parameter is found. This is due to the fact that it has not yet been implemented in the fall update and is not expected till 2013. Therefore we also need to derive our own <a href="http://aspnetwebstack.codeplex.com/workitem/370" target="_blank">QueryableAttribute</a> and override the validate method to allow $expand.</p>
+<p>&nbsp;</p>
+<h4>Outstanding Issues</h4>
+<p><br>* Need to implement odata model and enable $metadata support.<br>* Need to switch on syscache2 support for sql dependency based cache eviction.
+<div class="alert alert-info"><strong>Download:</strong> <a title="NHibernate queryable Web API Sample on github" href="https://github.com/PeteGoo/NHibernate.QueryService">Source is in Github</a></div>

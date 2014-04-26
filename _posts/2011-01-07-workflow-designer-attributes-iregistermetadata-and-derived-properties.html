@@ -1,0 +1,49 @@
+---
+layout: post
+title: Workflow Designer attributes, IRegisterMetadata and derived properties
+categories: []
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>If you are using the IRegisterMetadata type combined with the *.Design.dll deployment method for your custom WF4 activities, you need to be careful if you have an activity derived from a base activity.</p>
+<p>For example if you have code like the following:</p>
+<pre class="csharpcode">            builder.AddCustomAttributes(
+                <span class="kwrd">typeof</span>(MyBaseActivity&lt;&gt;),
+                <span class="str">&quot;MyProperty&quot;</span>,
+                <span class="kwrd">new</span> EditorAttribute(<span class="kwrd">typeof</span>(MyPropertyValueEditor), <span class="kwrd">typeof</span>(PropertyValueEditor)));</pre>
+<style type="text/css">
+<p>.csharpcode, .csharpcode pre<br />
+{<br />
+	font-size: small;<br />
+	color: black;<br />
+	font-family: consolas, "Courier New", courier, monospace;<br />
+	background-color: #ffffff;<br />
+	/*white-space: pre;*/<br />
+}<br />
+.csharpcode pre { margin: 0em; }<br />
+.csharpcode .rem { color: #008000; }<br />
+.csharpcode .kwrd { color: #0000ff; }<br />
+.csharpcode .str { color: #006080; }<br />
+.csharpcode .op { color: #0000c0; }<br />
+.csharpcode .preproc { color: #cc6633; }<br />
+.csharpcode .asp { background-color: #ffff00; }<br />
+.csharpcode .html { color: #800000; }<br />
+.csharpcode .attr { color: #ff0000; }<br />
+.csharpcode .alt<br />
+{<br />
+	background-color: #f4f4f4;<br />
+	width: 100%;<br />
+	margin: 0em;<br />
+}<br />
+.csharpcode .lnum { color: #606060; }</style>
+<p>Then you need to be aware that on the standard properties you can declare your EditorAttribute against the base class but for Argument property types you will need to declare them on the derived class. So the above example would work if MyProperty was a string for example, but if it was an InArgument&lt;string&gt; then you would need to register custom attributes against the derived class and for each derived class.</p>
+<p>I suspect the WF designer is automagically adding custom attributes for the Argument properties (to enable the Expression Text Box in the properties grid) against the derived classes and are hence overriding our base registrations.</p>

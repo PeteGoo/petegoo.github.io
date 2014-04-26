@@ -1,0 +1,67 @@
+---
+layout: post
+title: 'Unit Testing Workflow 4 Activities : The TestContext Tracking Participant'
+categories:
+- C#
+- Main Page
+- Unit Testing
+- Visual Studio
+- WF4
+tags:
+- TDD
+- Unit Testing
+- WF
+- Workflow
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I’m a big believer in using <a title="TestContext on MSDN" href="http://msdn.microsoft.com/en-us/library/ms404699(VS.80).aspx" target="_blank">TestContext</a> in MSTest or Console.WriteLine, Debug.WriteLine etc in your favourite Unit Testing framework to give context to passed or failed tests. Especially if you do <a title="Continuous Integration on Wikipedia" href="http://en.wikipedia.org/wiki/Continuous_integration" target="_blank">CI</a> and have only the test results to look at from the build server to try to understand why a build went wrong.</p>
+<p>Taking this into account I use a TestContext Tracking Participant to get more visibility into my workflow unit tests. This enables me to see what tracking records have been raised against my invoked workflows. In only a few lines of code you can quickly enable extra logging.</p>
+<pre class="code"><font size="2"><span style="color: blue">public class </span><span style="color: #2b91af">TestContextTrackingParticipant </span>: <span style="color: #2b91af">TrackingParticipant </span>{
+    <span style="color: blue">private readonly </span><span style="color: #2b91af">TestContext </span>testContext;
+
+    <span style="color: blue">public </span>TestContextTrackingParticipant(<span style="color: #2b91af">TestContext </span>testContext) {
+        <span style="color: blue">this</span>.testContext = testContext;
+    }
+
+    <span style="color: blue">protected override void </span>Track(<span style="color: #2b91af">TrackingRecord </span>record, <span style="color: #2b91af">TimeSpan </span>timeout) {
+        testContext.WriteLine(<span style="color: blue">string</span>.Format(<span style="color: #a31515">"- {0}"</span>, 
+            record.ToString()
+            .Replace(<span style="color: #a31515">"{"</span>, <span style="color: #a31515">"{{"</span>)
+            .Replace(<span style="color: #a31515">"}"</span>, <span style="color: #a31515">"}}"</span>)));
+    }
+}
+</font></pre>
+<p> </p>
+<p>The only issue is that our invoker code from the <a title="Unit Testing Basics" href="http://blog.petegoo.com/archive/2010/08/16/unit-testing-workflow-4-activities-basics.aspx" target="_blank">previous post</a> is a little more verbose.</p>
+<pre class="code"><font size="2">[<span style="color: #2b91af">TestMethod</span>]
+<span style="color: blue">public void </span>ExecuteConvertsTimeToTargetCity() {
+
+    <span style="color: #2b91af">DateTime </span>currentLocalTime = <span style="color: #2b91af">DateTime</span>.Now;
+    <span style="color: blue">string </span>cityName = <span style="color: #a31515">"London"</span>;
+
+    <span style="color: #2b91af">TimeZoneInfo </span>timeZoneInfo =
+        <span style="color: #2b91af">TimeZoneInfo</span>.GetSystemTimeZones().Where(
+            timeZone =&gt; timeZone.DisplayName.ToUpperInvariant().Contains(cityName.ToUpperInvariant())).First();
+
+    <span style="color: #2b91af">GetCityTime </span>activity = <span style="color: blue">new </span><span style="color: #2b91af">GetCityTime</span>() {
+                                                    City = cityName,
+                                                    LocalTime = <span style="color: blue">new </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: #2b91af">DateTime</span>&gt;(currentLocalTime)
+                                                };
+    <span style="color: #2b91af">WorkflowInvoker </span>invoker = <span style="color: blue">new </span><span style="color: #2b91af">WorkflowInvoker</span>(activity);
+
+    invoker.Extensions.Add(<span style="color: blue">new </span><span style="color: #2b91af">TestContextTrackingParticipant</span>(TestContext));
+
+    <span style="color: #2b91af">DateTime </span>result = (<span style="color: #2b91af">DateTime</span>)invoker.Invoke()[<span style="color: #a31515">"Result"</span>];
+
+    <span style="color: #2b91af">Assert</span>.AreEqual(<span style="color: #2b91af">TimeZoneInfo</span>.ConvertTime(currentLocalTime, timeZoneInfo), result);
+}</font></pre>

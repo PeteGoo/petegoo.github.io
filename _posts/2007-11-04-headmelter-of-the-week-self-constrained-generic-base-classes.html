@@ -1,0 +1,45 @@
+---
+layout: post
+title: HeadMelter of the week – Self-Constrained Generic Base Classes
+categories:
+- Head Melter
+- Main Page
+tags:
+- C#
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Melted my own brain for a few hours with this one today. Essentially a self-constrained generic base class looks like the following.</p>
+<div style="FONT-SIZE: 10pt; BACKGROUND: white; COLOR: black; FONT-FAMILY: Consolas">
+<p style="MARGIN: 0px">    <span style="COLOR: blue">public</span> <span style="COLOR: blue">class</span> <span style="COLOR: #2b91af">MyEntity</span> : <span style="COLOR: #2b91af">EntityBase</span>&lt;<span style="COLOR: #2b91af">MyEntity</span>&gt; {</p>
+<p style="MARGIN: 0px">    }</p>
+<p style="MARGIN: 0px"> </p>
+</div>
+<p style="MARGIN: 0px">This allows me to put some generic implementations in a base class for code that I would simply duplicate otherwise. For example:</p>
+<p style="MARGIN: 0px"> </p>
+<div style="FONT-SIZE: 10pt; BACKGROUND: white; COLOR: black; FONT-FAMILY: Consolas">
+<p style="MARGIN: 0px">    <span style="COLOR: blue">public</span> <span style="COLOR: blue">class</span> <span style="COLOR: #2b91af">EntityBase</span>&lt;T&gt; : <span style="COLOR: #2b91af">IEquatable</span>&lt;T&gt;, <span style="COLOR: #2b91af">IComparable</span>&lt;T&gt;</p>
+<p style="MARGIN: 0px">    {</p>
+<p style="MARGIN: 0px">        <span style="COLOR: blue">public</span> <span style="COLOR: blue">int</span> CompareTo(T other) {</p>
+<p style="MARGIN: 0px">            <span style="COLOR: green">// Insert compare code here</span></p>
+<p style="MARGIN: 0px"> </p>
+<p style="MARGIN: 0px">        }</p>
+<p style="MARGIN: 0px"> </p>
+<p style="MARGIN: 0px">        <span style="COLOR: blue">public</span> <span style="COLOR: blue">bool</span> Equals(T other) {</p>
+<p style="MARGIN: 0px">            <span style="COLOR: green">// Insert Equality Code Here</span></p>
+<p style="MARGIN: 0px">        }</p>
+<p style="MARGIN: 0px">    }</p>
+</div>
+<p><!--EndFragment--></p>
+<p style="MARGIN: 0px"> </p>
+<p style="MARGIN: 0px">Enjoy!</p>
+<p><!--EndFragment--></p>

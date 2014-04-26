@@ -1,0 +1,100 @@
+---
+layout: post
+title: 'Workflow 4: Human based workflows with an Email Approval Sample'
+categories:
+- C#
+- Main Page
+- TechEd
+- WF4
+tags:
+- Task
+- WF
+- Workflow
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>One of the questions that a lot of people ask about workflow 4 is how to integrate manual tasks into the workflow process so that humans can be involved and interact with the workflow process. After all, what use is a stateful, long running service if no humans are involved? All of the activities that ship with workflow 4 and many of the samples provided only really cover programmatic activities but what about user interaction, I mean WF4 does not even ship with an email activity.</p>
+<p>The purpose of this post is to introduce the concept of a manual task into a workflow process and show how correlation can be used to help route service calls back to the originating workflow instance. </p>
+<h2>Scenario</h2>
+<p>The problem we will try to solve is that we have a textual statement that needs to be sent to a number of people (approvers) who must approve or decline, indicating their acceptance of the statement. Once all the approvers have completed their tasks a report of the number of approvals is sent to the requestor. We are going to use emails to send the manual tasks to our approvers. The emails will have “Approve” and “Decline” links in them, clicking these links will update the status of the task in the workflow.</p>
+<h2>The Workflow</h2>
+<p>We start our workflow by creating a Workflow Service Library project and adding the parameters to our Receive activity to take the list of approver emails, the message which will be the statement that should be accepted or declined and the email of the requestor so that the report can be sent back to them. These parameters will be assigned to variables within our workflow.</p>
+<p><a href="http://blog.petegoo.com/blog/images/blog_petegoo_com/blog/WindowsLiveWriter/98851c857a1e_11F48/ApprovalSampleInitialReceive_2.gif"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px" title="ApprovalSampleInitialReceive" border="0" alt="ApprovalSampleInitialReceive" src="http://blog.petegoo.com/blog/images/blog_petegoo_com/blog/WindowsLiveWriter/98851c857a1e_11F48/ApprovalSampleInitialReceive_thumb.gif" width="525" height="545" /></a></p>
+<p>Next we have to process each of the approval emails and handle the corresponding responses. The rest of the workflow is shown below.</p>
+<p><a href="http://blog.petegoo.com/blog/images/blog_petegoo_com/blog/WindowsLiveWriter/98851c857a1e_11F48/ApprovalWorkflow2_2.png"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px" title="ApprovalWorkflow2" border="0" alt="ApprovalWorkflow2" src="http://blog.petegoo.com/blog/images/blog_petegoo_com/blog/WindowsLiveWriter/98851c857a1e_11F48/ApprovalWorkflow2_thumb.png" width="837" height="1134" /></a></p>
+<p>So lets walk through it. </p>
+<p><strong>ParallelForEach&lt;string&gt;</strong></p>
+<p>The first thing we need to consider is that we are going to process each of the approvals in parallel so that we are not dependent on the order of the responses. To do this we use a ParallelForEach&lt;T&gt; activity, this is essentially a parallel activity which will create a branch for each item in the source collection. The source collection in our case is the array of approver email addresses.</p>
+<p><strong>Send Approval and Wait for Response</strong></p>
+<p>This sequence will contain all our processing for a single approver branch. The most important things here which can’t be seen from the above image are the variables that belong to this sequence.</p>
+<p>- approverId :This is a unique Guid initialised here to a new random guid. This will be used as a unique identifier for this approver.</p>
+<p>- ApprovalCorrelationHandle: A correlation handle is a special type in workflow which holds information about how an incoming information can find our instance More on this later.</p>
+<p><strong>Send Approver Email</strong></p>
+<p>First we construct and send an email using a custom SendEmail activity included in the source. The implementation of this activity is not important, for our purposes all we care about is that it has four arguments, ToAddress, FromAddress, Subject and Body. The body contains an HTML message with Accept an Decline links to the web site we will create later.</p>
+<pre class="code"><span style="color: #a31515">"&lt;html&gt;" </span>&amp; _
+<span style="color: #a31515">"  &lt;body&gt;" </span>&amp; _
+<span style="color: #a31515">"    &lt;p&gt;Please approve or decline the following statement:&lt;/p&gt;" </span>&amp; _
+<span style="color: #a31515">"    &lt;h2&gt;" </span>&amp; messageToApprove &amp; <span style="color: #a31515">"&lt;/h2&gt;" </span>&amp; _
+<span style="color: #a31515">"    &lt;a href=""http://localhost/TechEdNZ/Approval.Web/Approval/Approve/" </span>&amp; approverId.ToString() &amp; <span style="color: #a31515">"""&gt;Approve&lt;/a&gt;&lt;br/&gt;" </span>&amp; _
+<span style="color: #a31515">"    &lt;a href=""http://localhost/TechEdNZ/Approval.Web/Approval/Decline/" </span>&amp; approverId.ToString() &amp; <span style="color: #a31515">"""&gt;Decline&lt;/a&gt;&lt;br/&gt;" </span>&amp; _
+<span style="color: #a31515">"  &lt;/body&gt;" </span>&amp; _
+<span style="color: #a31515">"&lt;/html&gt;"
+</span></pre>
+<p> </p>
+<p>As you can see it contains a bunch of not so pretty VB string concatenation. Not ideal but fit for our purposes.</p>
+<p><strong>InitializeCorrelation</strong></p>
+<p>The initialize correlation activity is used to setup our CorrelationHandle we declared earlier, We simply set the name of a correlation key “approverId” to the value of our guid variable “approverId.ToString()”. This means that we now have a correlation handle which can be used later on our Receive activity to allow the runtime to find this specific instance when the Receive endpoint is called with a compatible correlation parameter.</p>
+<p><strong>Pick</strong></p>
+<p>A pick is a very useful activity which basically says, perform each of my branches’ “trigger” sections in parallel and when the first one of them completes, cancel the other branched and run the completed branches’ “action” section. This is especially useful if you want to setup a number of Receive activities, essentially presenting a choice, and continue the workflow when a choice is made. In our case these triggers will be our Accept and Decline Receive activities.</p>
+<p><strong>Receive and SendReply</strong></p>
+<p>The two receive activities are simply operations on the same endpoint named “Accept” and “Decline”, they both have a single parameter called approverId which correlates to our unique guid via our CorrelationHandle, for more on how to setup correlation, see my <a href="http://blog.petegoo.com/archive/2010/06/27/wf4-services-part-2-ndash-correlation.aspx" target="_blank">previous post on the subject</a>.</p>
+<p><strong>Assign</strong></p>
+<p>The assign simply increments an approval counter if the approver selected Approve</p>
+<p><strong>Send Result Email</strong></p>
+<p>The send result sends the approval count to the original requestor.</p>
+<h2>The Web App</h2>
+<p>Unfortunately, WF4 does not easily support REST as a communication mechanism for its Receive activities so we needed the links in our email to present a confirmation to the approver and at the same time call our workflow. This was most easily accomplished via an ASP.Net MVC2 web application with an ApprovalController as follows:</p>
+<pre class="code"><span style="color: blue">public class </span><span style="color: #2b91af">ApprovalController </span>: <span style="color: #2b91af">Controller </span>{
+
+    <span style="color: blue">public </span><span style="color: #2b91af">ActionResult </span>Approve(<span style="color: blue">string </span>id) {
+        ApprovalWorkflowService.<span style="color: #2b91af">ServiceClient </span>serviceClient = <span style="color: blue">new </span>ApprovalWorkflowService.<span style="color: #2b91af">ServiceClient</span>();
+        serviceClient.Approve(id);
+        <span style="color: blue">return </span>View();
+    }
+
+    <span style="color: blue">public </span><span style="color: #2b91af">ActionResult </span>Decline(<span style="color: blue">string </span>id) {
+        ApprovalWorkflowService.<span style="color: #2b91af">ServiceClient </span>serviceClient = <span style="color: blue">new </span>ApprovalWorkflowService.<span style="color: #2b91af">ServiceClient</span>();
+        serviceClient.Decline(id);
+        <span style="color: blue">return </span>View();
+    }
+
+}</pre>
+<pre class="code"><font face="Lucida Sans Unicode">The RouteMapping in ASP.Net MVC will automatically turn our email link into the above method call which in turn will call our workflow with the appropriate approverId.</font></pre>
+<h2>The Client</h2>
+<p>The client app here is just a console app with the following code:</p>
+<pre class="code">ApprovalWorkflowService.<span style="color: #2b91af">ServiceClient </span>client = <span style="color: blue">new </span>ApprovalWorkflowService.<span style="color: #2b91af">ServiceClient</span>();
+client.BeginApprovalProcess(<span style="color: blue">new</span>[] {
+                                      <span style="color: #a31515">"approver1@foo.com"</span>, 
+                                      <span style="color: #a31515">"approver2@foo.com"</span>, 
+                                      <span style="color: #a31515">"approver3@foo.com"
+                                  </span>}, 
+                                  <span style="color: #a31515">"Holiday approval for Joe Bloggs from 2nd December to 12th January?"</span>, 
+                                  <span style="color: #a31515">"joe.bloggs@foo.com"</span>);</pre>
+<h2>Summary</h2>
+<p>And that’s about it. Correlation comes to the rescue enabling us to send the 3 emails to the above addresses and, when they all click the links in their emails, the MVC app sends a message to our workflow definition. That message is routed to the correct workflow instance because the Receive activity told the runtime to wait for a call to “Accept” with one of 3 approver ids and to route that call to our instance. After they have all responded the workflow will continue past the ParallelForEach and the result is sent.</p>
+<p>This application is fully compliant with pretty much any platform that has email and a browser and that’s as as simple as it gets.</p>
+<h2>What Next</h2>
+<p>This is just the beginning of how manual tasks can work in workflow. You could start to expand on this concept by mapping more data into your emails so that the approver is doing something more useful. Another option is to implement a threshold using a simple “If” so that e.g. 2 out of 3 approvers must approve and the workflow could subsequently decide whether to make a call to an HR service or something similar.</p>
+<p>I hope you found this post helpful, code below.</p>
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:F60BB8FA-6F02-4999-8F5E-9DD4E92C4DA7:8ab5b3e8-a679-434b-8e69-28e274031ef4" class="wlWriterEditableSmartContent">
+<div><a href="https://github.com/PeteGoo/Workflow.EmailApprovalSample" target="_self">Get the code at github</a></div>
+</div>

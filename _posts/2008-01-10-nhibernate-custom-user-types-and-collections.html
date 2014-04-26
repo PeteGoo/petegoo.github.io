@@ -1,0 +1,47 @@
+---
+layout: post
+title: NHibernate – Custom User Types and Collections
+categories:
+- C#
+- NHibernate
+- Patterns &amp; Practices
+tags:
+- NHibernate
+- ORM
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>NHibernate is an extremely powerful ORM but sometimes its quite difficult to find information on how to do certain things and why other things are the way they are. Recently I've been working on generating NHibernate mapping files and a domain model with its classes using Visual Studio DSL tools. Below are some of the difficulties I came across and their solutions.</p>
+<h4>Mapping Enums to string database representations</h4>
+<p>Sometimes you have a database schema which requires you to provide things like "M" for male and "F" for female. It does not make sense to force your users to use a string for the gender. We simply want an enum. On the other hand we cannot simply put an integer in the database as it then requires the domain to have any context and is not self-describing. What we really want is enums in our domain and single char fields in our db.</p>
+<p>Obviously we need some custom mapping. This is where the IUserType interface from NHibernate comes into play. You can implement this type on a converter class and specify the converter type in the type attribute in your NHibernate mapping instead of the actual enum type. </p>
+<p>More Info at the following links:<br /><a href="http://www.hibernate.org/hib_docs/nhibernate/1.2/reference/en/html/mapping.html#mapping-types-custom" target="_blank">NHibernate Documentation - Custom value types</a><br /><a href="http://codebetter.com/blogs/jeremy.miller/archive/2006/02/20/138732.aspx" target="_blank">Jeremy D. Miller's blog - Mapping Enumerations with NHibernate - and hooray for open source unit tests</a></p>
+<h4>Generic Identifiers and Generators</h4>
+<p>Sometimes you have a mix of identifier types in your database schema, we may have guids, ints and even strings (eh? strings? what were you thinking?). You could implement a generic identifier type which hides these three types as you never really care about the content of the identifier, only that the ORM can use it to query etc. The problem is how do we tell NHibernate to convert this type and how do we allow a generator to build the e.g. guid before sending to the database? </p>
+<p>First, your identifier type needs to implement a Identifier.Empty as default and allow it to always return default(T) as a non-instantiated version when you new-up an object in your domain. NHibernate will detect this equality and differentiate between new instances and instances which need to be updated instead of inserted.</p>
+<p>Secondly, you need to implement an IUserType as above for each schema type. This will be the type specified in your HBM file and will convert between db type and your all-encompassing Identifier type.</p>
+<p>Now we have a problem, the standard id generators in NHibernate no longer work as they want to generate the new id in the domain class before persisting, this will cause a type cast failure between the expected db type output from the generator and your custom identifier type. This time you need to create a custom identifier using a new class which implements <strong>NHibernate.Id.IPersistentIdentifierGenerator</strong> and <strong>NHibernate.Id.IConfigurable</strong>. This can detect the type of the real db schema and generate the correct type. You can also pass params to allow this to be configurable.</p>
+<h4>ISet&lt;T&gt; and IList&lt;T&gt; - sets, bags etc</h4>
+<p>NHibernate requires the usage of a set to allow the tracking of items added and removed on a collection. Unfortunately there is no concept of a set in the .Net Framework. The implementation of a set is provided in the Iesi.Collections dll which is shipped with NHibernate.</p>
+<p>At runtime NHibernate tries to wrap the collection on a property which is defined in the HBM as a set with a collection which derives from <em><strong>Iesi.Collections.Generic.ISet&lt;T&gt;</strong></em> it can use to track changes in the collection. This allows NHibernate to only issue updates to changed members rather than deleting and recreating the entire collection. Normally the collection <em><strong>Iesi.Collections.Generic.HashedSet&lt;T&gt;</strong></em> is used in the domain class and this is then wrapped by NHibernate at runtime in a <em><strong>NHibernate.Collection.Generic.PersistentGenericSet&lt;T&gt;</strong></em> which allows the tracking of changes. This wrapping happens when a transient collection is saved or when a persisted collection is returned from the database.</p>
+<p>This means that we cannot have purely CLR types in our domain model because we need to have an implementation of the <em><strong>ISet</strong></em> for transient and persisted collections. To protect the domain model in the possible future event of replacing NHibernate as a persistence strategy (and cos we don't want persistence creeping into our domain), new collection types have to be created. Create your own interface e.g. <em><strong>ISet&lt;T&gt;</strong></em>. This <em><strong>ISet&lt;T&gt;</strong></em> implements <em><strong>IList&lt;T&gt;</strong></em> and <em><strong>Iesi.Collections.Generic.ISet&lt;T&gt;</strong></em> allowing us to use standard <em><strong>IList&lt;T&gt;</strong></em> and <em><strong>ICollection&lt;T&gt;</strong></em> methods while keeping compatibility with NHibernate. The transient version of the set is called <em><strong>e.g. Set&lt;T&gt;</strong></em>, this also implements <em><strong>IUserCollectionType</strong></em> which defines the contract for NHibernate specific wrapping to persistent collection etc. The persisted version is called <em><strong>e.g. PersistentSet&lt;T&gt;</strong></em> and this inherits from <em><strong>NHibernate.Collection.Generic.PersistentGenericSet&lt;T&gt;</strong></em> to give NHibernate the change tracking it requires.</p>
+<p>To use the new Sets in a domain, the following implementation is necessary.</p>
+<ul>
+<li>The private fields and public properties for collections are defined as IList&lt;T&gt;. This allows standard interaction with the collection for domain consumption.
+</li>
+<li>The actual implementation when the domain needs to instantiate a collection is of type <em><strong>MyNamespace.Set&lt;T&gt;</strong></em> to allow NHibernate to cast properly at runtime.
+</li>
+<li>In the case of readonly collections, one of the two readonly collections is created from the constructor passing in the IList&lt;T&gt; as part of the get accessor of the property
+</li>
+<li>In the HBM mapping file the <em><strong>collection-type</strong></em> attribute is added to the set declaration with the generic type name of the transient collection e.g. <strong>collection-type="<em><em>MyNamespace</em>.Set`1[[<em>MyNamespace.MyDomain</em>.MyDomainClass]]"</em></strong></li>
+</ul>
+<p>Once this is done you should be able to save and retrieve your collections without issues. Notice that when you save a transient collection, it is automatically cast to your persistent collection using the Wrap method of IUserCollectionType and this type is also used when retrieving from the db. Nice!</p>

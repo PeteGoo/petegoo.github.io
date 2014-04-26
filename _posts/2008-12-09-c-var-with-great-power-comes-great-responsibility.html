@@ -1,0 +1,20 @@
+---
+layout: post
+title: C# var – with great power comes great responsibility
+categories: []
+tags:
+- C#
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>There are many heated discussions on the overuse of var and I'm not going to repeat the arguments here. Personally, I have no problem with var used in the declaration of a variable where the value is instantiated inline via a constructor, anything else (apart from LINQ) seems dangerous. Having said that, the following sample I came across today is simply stupid.</p>
+<p>var controller = new MyController().GetValueX(foo);</p>

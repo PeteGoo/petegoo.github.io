@@ -1,0 +1,62 @@
+---
+layout: post
+title: Pipelining a query provider onto Linq to Objects
+categories:
+- C#
+- LINQ
+- WPF
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Recently I’ve seen a few problems occur in our codebase that made me think, there must be an obvious solution to this. Basically we have a bunch of <em>data provider</em> classes that expose a GetQuery method that returns an IQueryable&lt;T&gt;, we use these generically in our UI controls such that the control will have no knowledge of the data provider it has, only that it can get the queryable via GetQuery and due to deferred execution the control is able to schedule it on a background thread instead of blocking the UI thread.</p>
+<p>This is all very cool and works fine until a specific data provider needs to do some kind of processing that isn’t supported by OData. You see once we reach the limits of the OData query provider we have to transition to Linq to Objects if we want to do a contains or something similar (like <em>if the category is in this predefined list</em>). This presents us with a problem as the data provider must choose to evaluate the OData query on the UI thread so that it can post-process the result and hence block the UI thread leaving our users with an experience that is not quite <em>fast and fluid</em>.</p>
+<p>Well, I sat down to try to figure this out and realised it’s as easy as calling AsEnumerable. This may be obvious to you dear reader but I just never knew this trick. You see the AsEnumerable extension method on an IQueryable will not immediately evaluate the query like ToArray or ToList. Instead it will simply move into Linq to Objects as the query provider writing an As operator into the existing expression tree thus building a pipeline from Linq to OData to Linq to Objects retaining the deferred execution behavior. The result is the code below.</p>
+<p>&nbsp;</p>
+<pre class="brush: csharp;">public class MainWindowViewModel {
+    private readonly ObservableCollection&lt;Title&gt; titles = new ObservableCollection&lt;Title&gt;();
+
+    public async Task EvaluateQuery() {
+        IQueryable&lt;Title&gt; queryable = GetDataProvider().GetQuery();
+        // At this point we have not yet sent a request over the wire
+        // Now evaluate our queryable, it will execute a pipeline of two steps, Linq to OData | Linq to Objects
+        var result = await Task.Factory.StartNew(() =&gt; queryable.ToArray());
+        // We now update our UI bound property
+        titles.Clear();
+        result.ToList().ForEach(titles.Add);
+    }
+
+    public ObservableCollection&lt;Title&gt; Titles {
+        get { return titles; }
+    }
+
+    private DataProvider GetDataProvider() {
+        // Normally this would be some sort of factory code to get a data provider
+        return new DataProvider();
+    }
+}
+
+public class DataProvider {
+    public IQueryable&lt;Title&gt; GetQuery() {
+        return new NetflixCatalog(new Uri("http://odata.netflix.com/Catalog/"))
+            .Titles
+            .Where(t =&gt; t.Name.Contains("dude"))
+            .AsEnumerable() // Transfer into Linq to Objects for this part but keep deferred execution
+            .Where(s =&gt; IsMatch(s.Name))
+            .AsQueryable();
+    }
+
+    public bool IsMatch(string name) {
+        // Do some complicated filtering logic that can't be represented on an OData URI
+        return true;
+    }
+}
+</pre>

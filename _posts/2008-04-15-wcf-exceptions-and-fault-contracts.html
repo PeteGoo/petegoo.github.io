@@ -1,0 +1,132 @@
+---
+layout: post
+title: WCF Exceptions and Fault Contracts
+categories:
+- Main Page
+- WCF
+tags:
+- WCF
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I ran across an issue recently trying to get a custom exception across a WCF boundary. The trouble is, WCF does not like to tell you what the problem was, and for good reason. I was thinking about exceptions the wrong way. In reality we do not want to pass exceptions across a WCF service boundary, instead we want to pass a Fault back to the caller.</p>
+<p>An exception is a CLR concept, it does not make sense to expose this outside of the CLR, despite the fact that an exception contains potentially dangerous information (like the stack trace) which we do not want to expose. If your service does not handle an exception, it will fault. Hence a lot of the time we implement a try-catch handler and raise a <a title="FaultException article in MSDN" href="http://msdn2.microsoft.com/en-us/library/ms576199.aspx" target="_blank">FaultException</a> which gets sent across the boundary.</p>
+<p> </p>
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<p style="margin: 0px"> </p>
+</div>
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<p style="margin: 0px">[<span style="color: #2b91af">OperationContract</span>]</p>
+<p style="margin: 0px">[<span style="color: #2b91af">FaultContract</span>(<span style="color: blue">typeof</span>(<span style="color: #2b91af">DivideByZeroException</span>))]</p>
+<p style="margin: 0px"><span style="color: blue">public</span> <span style="color: blue">void</span> MyServiceMethod() {</p>
+<p style="margin: 0px">    <span style="color: blue">try</span> {</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        <span style="color: green">// Do some actual stuff</span></p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">    <span style="color: blue">catch</span>(<span style="color: #2b91af">DivideByZeroException</span> ex) {</p>
+<p style="margin: 0px">        <span style="color: blue">throw</span> <span style="color: blue">new</span> <span style="color: #2b91af">FaultException</span>&lt;<span style="color: #2b91af">DivideByZeroException</span>&gt;(ex, <span style="color: blue">new</span> <span style="color: #2b91af">FaultReason</span>(<span style="color: #a31515">"DivisionByZero"</span>));</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">}</p>
+</div>
+<p>Then on your proxy side you will typically recreate this exception and throw it.</p>
+<p>This approach sometimes has problems when your exception has some extra data in it. Consider the following custom exception type:</p>
+<p> </p>
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<p style="margin: 0px"><span style="color: blue">public</span> <span style="color: blue">class</span> <span style="color: #2b91af">MyDivideByZeroException</span> : <span style="color: #2b91af">DivideByZeroException</span>, <span style="color: #2b91af">ISerializable</span> {</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">protected</span> MyDivideByZeroException(<span style="color: #2b91af">SerializationInfo</span> info, <span style="color: #2b91af">StreamingContext</span> context)</p>
+<p style="margin: 0px">        : <span style="color: blue">base</span>(info, context) {</p>
+<p style="margin: 0px">        numerator = (<span style="color: blue">int</span>)info.GetValue(<span style="color: #a31515">"numerator"</span>, <span style="color: blue">typeof</span>(<span style="color: blue">int</span>));</p>
+<p style="margin: 0px">        denominator = (<span style="color: blue">int</span>)info.GetValue(<span style="color: #a31515">"denominator"</span>, <span style="color: blue">typeof</span>(<span style="color: blue">int</span>));</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">private</span> <span style="color: blue">int</span> numerator;</p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">int</span> Numerator {</p>
+<p style="margin: 0px">        <span style="color: blue">get</span> { <span style="color: blue">return</span> numerator; }</p>
+<p style="margin: 0px">        <span style="color: blue">set</span>{ numerator = <span style="color: blue">value</span>;}</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">int</span> denominator;</p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">int</span> Denominator {</p>
+<p style="margin: 0px">        <span style="color: blue">get</span> { <span style="color: blue">return</span> denominator; }</p>
+<p style="margin: 0px">        <span style="color: blue">set</span> { denominator = <span style="color: blue">value</span>; }</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> MyDivideByZeroException(<span style="color: blue">int</span> numerator, <span style="color: blue">int</span> denominator) : <span style="color: blue">base</span>() {</p>
+<p style="margin: 0px">        <span style="color: blue">this</span>.numerator = numerator;</p>
+<p style="margin: 0px">        <span style="color: blue">this</span>.denominator = denominator;</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">void</span> <span style="color: #2b91af">ISerializable</span>.GetObjectData(<span style="color: #2b91af">SerializationInfo</span> info, <span style="color: #2b91af">StreamingContext</span> context) {</p>
+<p style="margin: 0px">        info.AddValue(<span style="color: #a31515">"numerator"</span>, numerator, <span style="color: blue">typeof</span>(<span style="color: blue">int</span>));</p>
+<p style="margin: 0px">        info.AddValue(<span style="color: #a31515">"denominator"</span>, denominator, <span style="color: blue">typeof</span>(<span style="color: blue">int</span>));</p>
+<p style="margin: 0px">        <span style="color: blue">base</span>.GetObjectData(info, context);</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">}</p>
+</div>
+</div>
+<p>When you try this with the FaultException you may get an exception like the following: <br /><strong><em>The underlying secure session has faulted before the reliable session fully completed. The reliable session was faulted. The reliable messaging channel threw an exception because the reliable session was broken. </em></strong></p>
+<p>In this case you can create a Fault class. Your fault class is simply a Data Contract serializable type containing the information you require to create your exception on the other side. e.g.</p>
+<p> </p>
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<p style="margin: 0px">[<span style="color: #2b91af">DataContract</span>]</p>
+<p style="margin: 0px"><span style="color: blue">public</span> <span style="color: blue">class</span> <span style="color: #2b91af">DivideByZeroFault</span> {</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> DivideByZeroFault(<span style="color: #2b91af">MyDivideByZeroException</span> exception) {</p>
+<p style="margin: 0px">        <span style="color: blue">this</span>.numerator = exception.Numerator;</p>
+<p style="margin: 0px">        <span style="color: blue">this</span>.denominator = exception.Denominator;</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: #2b91af">MyDivideByZeroException</span> GetException() {</p>
+<p style="margin: 0px">        <span style="color: blue">return</span> <span style="color: blue">new</span> <span style="color: #2b91af">MyDivideByZeroException</span>(numerator, denominator);</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    [<span style="color: #2b91af">DataMember</span>]</p>
+<p style="margin: 0px">    <span style="color: blue">private</span> <span style="color: blue">int</span> numerator;</p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">int</span> Numerator {</p>
+<p style="margin: 0px">        <span style="color: blue">get</span> { <span style="color: blue">return</span> numerator; }</p>
+<p style="margin: 0px">        <span style="color: blue">set</span> { numerator = <span style="color: blue">value</span>; }</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    [<span style="color: #2b91af">DataMember</span>]</p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">int</span> denominator;</p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">int</span> Denominator {</p>
+<p style="margin: 0px">        <span style="color: blue">get</span> { <span style="color: blue">return</span> denominator; }</p>
+<p style="margin: 0px">        <span style="color: blue">set</span> { denominator = <span style="color: blue">value</span>; }</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">}</p>
+</div>
+<p style="margin: 0px" /></div>
+<p> </p>
+<p>Therefore your service code in the first example will change to be:</p>
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<p style="margin: 0px">[<span style="color: #2b91af">OperationContract</span>]</p>
+<p style="margin: 0px">[<span style="color: #2b91af">FaultContract</span>(<span style="color: blue">typeof</span>(<span style="color: #2b91af">DivideByZeroFault</span>))]</p>
+<p style="margin: 0px"><span style="color: blue">public</span> <span style="color: blue">void</span> MyServiceMethod() {</p>
+<p style="margin: 0px">    <span style="color: blue">try</span> {</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        <span style="color: green">// Do some actual stuff</span></p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">    <span style="color: blue">catch</span>(<span style="color: #2b91af">MyDivideByZeroException</span> ex) {</p>
+<p style="margin: 0px">        <span style="color: blue">throw</span> <span style="color: blue">new</span> <span style="color: #2b91af">FaultException</span>&lt;<span style="color: #2b91af">DivideByZeroFault</span>&gt;(<span style="color: blue">new</span> <span style="color: #2b91af">DivideByZeroFault</span>(ex), <span style="color: blue">new</span> <span style="color: #2b91af">FaultReason</span>(<span style="color: #a31515">"DivisionByZero"</span>));</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">}</p>
+</div>
+<p style="margin: 0px" /></div>
+<div style="font-size: 10pt; background: white; color: black; font-family: courier new">
+<p style="margin: 0px"> </p>
+</div>
+<p>This will allow WCF to send across the relevant information without compromising the applications security by sending a stack trace etc.
+<p>Pete</p>

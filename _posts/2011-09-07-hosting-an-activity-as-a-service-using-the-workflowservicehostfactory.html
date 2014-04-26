@@ -1,0 +1,88 @@
+---
+layout: post
+title: Hosting an Activity as a Service using the WorkflowServiceHostFactory
+categories:
+- C#
+- Enterprise Workflow
+- TechEd
+- tenz
+- WCF
+- WF4
+tags:
+- Enterprise Workflow
+- WCF
+- WF
+- WF4
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>This is the second post in a series about <a title="Building an Enterprise Workflow system with WF4" href="http://blog.petegoo.com/index.php/2011/09/02/building-an-enterprise-workflow-system-with-wf4/">Building an Enterprise Workflow system with WF4</a>.</p>
+<p>In the <a title="Activities vs WF Services: In search of the ideal authoring experience" href="http://blog.petegoo.com/index.php/2011/09/03/activities-vs-wf-services-in-search-of-the-ideal-authoring-experience/">previous post</a> we discussed how the default workflow service design experience wasn’t really what we would want for an enterprise workflow system. We decided that the activity authoring experience we wanted was much better and we even hinted that the <a title="WorkflowServiceHostFactory on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activation.workflowservicehostfactory.aspx" target="_blank">WorkflowServiceHostFactory</a> would enable us to host an activity as a service. Lets look at how we can do this.</p>
+<p>I have modified the Magic Eight Ball sample from the <a title="Activities vs WF Services: In search of the ideal authoring experience" href="http://blog.petegoo.com/index.php/2011/09/03/activities-vs-wf-services-in-search-of-the-ideal-authoring-experience/">previous post</a> to make it an activity rather than a xamlx workflow service file.</p>
+<p>&#160;<a href="http://blog.petegoo.com/wp-content/uploads/2011/09/CropperCapture7.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px" title="CropperCapture[7]" border="0" alt="CropperCapture[7]" src="http://blog.petegoo.com/wp-content/uploads/2011/09/CropperCapture7_thumb.jpg" width="304" height="258" /></a></p>
+<p>In a normal .xamlx workflow service like the one you get with the workflow service library template, the web.config makes no mention of the .xamlx file or workflow or anything that would suggest the app will host a workflow. In fact the .xamlx is automatically mapped by the runtime with a default binding and endpoint using the simplified configuration feature of WCF 4. This means that a .xamlx file will be hosted as a service using the BasicHttpBinding at the address of the xamlx file, much like the svc file for standard WCF services.</p>
+<p>We can however specify our own service activation in the web.config as follows:</p>
+<pre class="brush: xml;">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;configuration&gt;
+  ...
+  &lt;system.serviceModel&gt;
+    ...
+    &lt;serviceHostingEnvironment multipleSiteBindingsEnabled=&quot;true&quot; &gt;
+      &lt;!-- Add the service Activations section--&gt;
+      &lt;serviceActivations&gt;
+        &lt;add relativeAddress=&quot;~/EightBall.svc&quot;
+             service=&quot;BasicMagicEightBall.EightBall, BasicMagicEightBall&quot;
+             factory=&quot; EightBallLibrary.Hosting.EnterpriseServiceHostFactory, EightBallLibrary&quot;/&gt;
+      &lt;/serviceActivations&gt;
+    &lt;/serviceHostingEnvironment&gt;
+  &lt;/system.serviceModel&gt;
+  ...
+&lt;/configuration&gt;</pre>
+<p>&#160;</p>
+<p>If we break the serviceActivation element down:</p>
+<ul>
+<li>relativeAddress: The relative URI that we will use, this does not have to end with .xamlx and the file in the path does actually exist </li>
+<li>service: The service to load, in our case this is the compiled xaml activity name and assembly name </li>
+<li>factory: This is our custom service host factory </li>
+</ul>
+<ul>In WCF you have a <a title="ServiceHost on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.servicehost.aspx" target="_blank">ServiceHost</a>, in Workflow we have a <a title="WorkflowServiceHost on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.workflowservicehost.aspx" target="_blank">WorkflowServiceHost</a>. In WCF we have a <a title="ServiceHostFactory on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activation.servicehostfactory.aspx" target="_blank">ServiceHostFactory</a>, therefore in Workflow we have a <a title="WorkflowServiceHostFactory on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activation.workflowservicehostfactory.aspx">WorkflowServiceHostFactory</a>. </ul>
+<p>Notice that when we implement a custom class deriving from WorkflowServiceHostFactory that we have 2 overrides for CreateWorkflowServiceHost, one that takes a WorkflowService and one that takes an Activity. Obviously the second one is the one that is going to run in our case.</p>
+<pre class="brush: csharp;">protected override WorkflowServiceHost CreateWorkflowServiceHost(WorkflowService service, Uri[] baseAddresses) {
+    WorkflowServiceHost workflowServiceHost = base.CreateWorkflowServiceHost(service, baseAddresses);
+    AddBehaviorsAndEndpoints(workflowServiceHost);
+    return workflowServiceHost;
+}
+
+protected override WorkflowServiceHost CreateWorkflowServiceHost(System.Activities.Activity activity, Uri[] baseAddresses) {
+    WorkflowServiceHost workflowServiceHost = base.CreateWorkflowServiceHost(activity, baseAddresses);
+    AddBehaviorsAndEndpoints(workflowServiceHost);
+    return workflowServiceHost;
+}</pre>
+<p>&#160;</p>
+<p>We can add our own behaviors etc, hence the call to my AddBehaviorsAndEndpoints method. With this we can do many things to configure our WorkflowServiceHost including:</p>
+<ul>
+<li>Hard Code Instance Store persistence </li>
+<li>Add WF Idle Behavior </li>
+<li>Add WF Unhandled Exception Behavior </li>
+<li>Add a WF control endpoint for controlling running instances </li>
+<li>Add a custom WF tracking behavior </li>
+<li>Add custom WF extensions </li>
+<li>Customize behaviors etc on WF hosted endpoints (Like adding security behaviors etc) </li>
+<li>Add a WF Creation Endpoint – more on that later. </li>
+</ul>
+<p>Now we have a workflow activity hosted as a service, just one problem. Remember that in our workflow service xamlx created by the Workflow Service Library project template we had a Receive activity with a SendReply. If you look closer on the properties for the Receive activity you will notice that there is a property called CanCreateInstance set to true. </p>
+<p>When you have a Receive /SendResponse activity pair on a workflow definition, the workflow service host sets up that activity pair as a WCF service operation on the workflow service when the service host starts. If it has “CanCreateInstance” set, any call to that service operation will create a new instance of our workflow definition.</p>
+<p>With our new hosted activity we have no way of starting a new instance as we do not have a Receive activity waiting on an incoming call. This is where the <a title="WorkflowCreationEndpoint on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activities.workflowhostingendpoint.aspx" target="_blank">WorkflowCreationEndpoint</a> comes in, it will allow us to have a standard contract for creating new instances of our workflow, it will also be the subject of the <a title="The Creation Endpoint" href="http://blog.petegoo.com/index.php/2011/09/19/starting-wf-instances-using-the-creation-endpoint/" target="_blank">next post</a>.</p>
+<div class="xdownload">
+<div style="padding-bottom: 0px; border-right-width: 1px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; border-top-width: 1px; border-bottom-width: 1px; border-left-width: 1px; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:7112bb3d-3a91-4f1e-b688-368c61bf308d" class="wlWriterSmartContent">
+<p>Download the Code <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/EnterpriseWorkflowDemo1.zip" target="_blank">EnterpriseWorkflowDemo.zip</a></p>
+</div>
+</div>

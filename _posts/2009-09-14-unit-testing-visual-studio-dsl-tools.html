@@ -1,0 +1,93 @@
+---
+layout: post
+title: Unit Testing Visual Studio DSL Tools
+categories: []
+tags:
+- DSL Tools
+- TDD
+- Unit Testing
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I’ve been meaning to post this entry for a while now so while I wait for a 2010 beta install to complete…. </p>
+<p>For a long time I thought it wasn’t possible to unit test DSL Tools projects easily. Due to the nature of the environment it is sometimes difficult to see how unit testing is possible. The model elements are put in a partition in a store and all the partial classes, rules etc are very tightly coupled.</p>
+<p>It wasn’t until I wanted to write a use-case oriented management layer on top of our multiple DSLs that I first thought of how it was possible. I wanted to a find way to test that the abstracted co-ordination methods on the management layer would create the expected model elements and what I got was an accidental pattern for testing DSL tools.</p>
+<p>The main trick lies in creating a model context that will hold your store, model root and handle transactions.</p>
+<p>The ModelingTestContext class:</p>
+<div style="font-family: courier new; background: white; color: black; font-size: 10pt">
+<p style="margin: 0px"><span style="color: blue">public</span> <span style="color: blue">class</span> <span style="color: #2b91af">ModelingTestContext</span> : <span style="color: #2b91af">IDisposable</span> {</p>
+<p style="margin: 0px">    <span style="color: blue">private</span> Transaction tx;</p>
+<p style="margin: 0px">    <span style="color: blue">private</span> Store store;</p>
+<p style="margin: 0px">    <span style="color: blue">public</span> ModelingTestContext() {</p>
+<p style="margin: 0px">        store = <span style="color: blue">new</span> Store();</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        <span style="color: #2b91af">Type</span> domainModelType = <span style="color: blue">typeof</span>(MyCompany.DomainModelDslDomainModel);</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        <span style="color: green">// Create a new store to deserialize the instance to. </span></p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        <span style="color: #2b91af">Type</span>[] metaTypes = <span style="color: blue">new</span> <span style="color: #2b91af">Type</span>[]</p>
+<p style="margin: 0px">                               {</p>
+<p style="margin: 0px">                                   <span style="color: blue">typeof</span> (CoreDesignSurfaceDomainModel),</p>
+<p style="margin: 0px">                                   domainModelType </p>
+<p style="margin: 0px">                               };</p>
+<p style="margin: 0px">        <span style="color: green">// Load these types into the store, so that it knows about them for deserialization </span></p>
+<p style="margin: 0px">        store.LoadDomainModels(metaTypes);</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        tx = store.TransactionManager.BeginTransaction(<span style="color: #a31515">"Domain Modeling Test Context"</span>);</p>
+<p style="margin: 0px">        domainModelRoot = <span style="color: blue">new</span> MyModelRoot(store);</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> MyModelRoot DomainModelRoot {</p>
+<p style="margin: 0px">        <span style="color: blue">get</span> { <span style="color: blue">return</span> domainModelRoot; }</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> Store Store {</p>
+<p style="margin: 0px">        <span style="color: blue">get</span> { <span style="color: blue">return</span> store; }</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">void</span> CommitChanges() {</p>
+<p style="margin: 0px">        tx.Commit();</p>
+<p style="margin: 0px">        tx = store.TransactionManager.BeginTransaction(<span style="color: #a31515">"Domain Modeling Test Context"</span>);</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    <span style="color: blue">public</span> <span style="color: blue">void</span> Dispose() {</p>
+<p style="margin: 0px">        <span style="color: blue">if</span>(tx != <span style="color: blue">null</span> &amp;&amp; tx.IsActive) {</p>
+<p style="margin: 0px">            tx.Rollback();</p>
+<p style="margin: 0px">        }</p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">}</p>
+</p></div>
+<p>This class will create the model root inside the store and manage transactions for us. We next need to start writing a test.</p>
+<div style="font-family: courier new; background: white; color: black; font-size: 10pt">
+<p style="margin: 0px">[TestMethod]</p>
+<p style="margin: 0px"><span style="color: blue">public</span> <span style="color: blue">void</span> CreateAssociationSingleMultiplicity() {</p>
+<p style="margin: 0px">    <span style="color: blue">using</span> (ModelingTestContext domainContext = <span style="color: blue">new</span> ModelingTestContext()) {</p>
+<p style="margin: 0px">        domainContext.DomainModelRoot.Namespace = <span style="color: #a31515">"Aderant.Test.DomainFoo"</span>;</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        DomainComponent clientDc = domainContext.CreateDomainComponent(<span style="color: #a31515">"Client"</span>);</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        DomainComponent addressDc = domainContext.CreateDomainComponent(<span style="color: #a31515">"Address"</span>);</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        AssociationLink link = clientDc.AssociateWith(addressDc, Multiplicity.One);</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">        domainContext.CommitChanges();</p>
+<p style="margin: 0px">        Assert.AreEqual(addressDc.Name, link.TargetRoleName);</p>
+<p style="margin: 0px"> </p>
+<p style="margin: 0px">    }</p>
+<p style="margin: 0px">}</p>
+</p></div>
+<p>We create a context inside a using block so that we can clean up the transaction when the test completes. In this test I have added extension methods to the domain context and the DomainComponent class to support the common scenarios I used in testing like <em>CreateDomainComponent </em>and <em>AssociationWith</em>, allowing me to encapsulate common behavior. These extension methods can then be moved to become behavior of the model or the management API. Therefore over time you provide better API functionality which is tested.</p>
+<p>Now some people would call this integration testing instead of unit testing…..fair enough. Also some would say that the extension methods and the test context for that matter are making the tests brittle as DRY does not apply to unit testing, I would disagree as otherwise these tests would become unmanageable.</p>
+<p>I hope you find this useful.</p>
+<p>Pete</p>

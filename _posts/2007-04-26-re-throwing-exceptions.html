@@ -1,0 +1,30 @@
+---
+layout: post
+title: Re-Throwing Exceptions
+categories:
+- Main Page
+tags:
+- C#
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I was going over some old code recently to try to resolve a production issue. The log of the stack trace was not providing enough information on the thrown exception and it reminded me of a good tip for throwing and specifically re-throwing exceptions.</p>
+<p>Consider the following code:</p>
+<p> </p>
+<div class="codeBlock">
+<p><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">try<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">{<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">  int</span> x = 0;<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">  int</span> y = 5 / x;<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">}<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">catch</span> (<span style="COLOR: teal">Exception</span> ex)<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">{<br />  </span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">throw</span> ex;<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">} </span></span></span></span></span></span></span></span></span></p>
+</div>
+<p>The stack trace at the time that the DivisionByZero is thrown will be different from the rethrow in the catch block. This is because the "throw ex" will create a new exception and throw it. Instead, you should try to use the code below.</p>
+<div class="codeBlock">
+<p><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">try<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">{<br />  </span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">int</span> x = 0;<br />  </span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">int</span> y = x / 5;<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">}<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">catch</span> (<span style="COLOR: teal">Exception</span> ex)<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">{<br />  </span><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'"><span style="COLOR: blue">throw</span>;<br /><span style="FONT-SIZE: 10pt; FONT-FAMILY: 'Courier New'">} </span></span></span></span></span></span></span></p>
+</div>
+<p>In this case the original exception will be thrown with the correct stack trace. Of course wrapping the exception before it is thrown will also preserve the stack trace.</p>

@@ -1,0 +1,114 @@
+---
+layout: post
+title: Using JSON.Net to eval json into a dynamic variable in C#
+categories: []
+tags:
+- C#
+- Dynamic
+- JSON
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>So I thought this would be possible and finally decided to give it a shot in 2010 Beta 2. It turns a bunch of JSON into an <a href="http://msdn.microsoft.com/en-us/library/system.dynamic.expandoobject(VS.100).aspx">ExpandoObject</a> using <a title="Json.Net" href="http://json.codeplex.com/">JSON.Net</a>.</p>
+<p>Needs cleaning up but not too bad.</p>
+<div class="Section1">
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">        [<span style="color: #2b91af">TestMethod</span>]</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">        <span style="color: blue">public</span> <span style="color: blue">void</span> DeserializeTestObjectToDynamic(){</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">TestObject</span> testObject = <span style="color: blue">new</span> <span style="color: #2b91af">TestObject</span>() {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                FirstName = <span style="color: #a31515">"Peter"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                LastName = <span style="color: #a31515">"Goodman"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                DateOfBirth = <span style="color: blue">new</span> <span style="color: #2b91af">DateTime</span>(<span style="color: brown">1979</span>, <span style="color: brown">2</span>, <span style="color: brown">3</span>),</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                Child = <span style="color: blue">new</span> <span style="color: #2b91af">TestChildObject</span> {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line1 = <span style="color: #a31515">"child line 1"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line2 = <span style="color: #a31515">"child line 2"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line3 = <span style="color: #a31515">"child line 3"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    City = <span style="color: #a31515">"child city"</span></span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                },</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                Children = <span style="color: blue">new</span> <span style="color: #2b91af">Collection</span>&lt;<span style="color: #2b91af">TestChildObject</span>&gt;() {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    <span style="color: blue">new</span> <span style="color: #2b91af">TestChildObject</span>() { </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line1 = <span style="color: #a31515">"children 1 line 1"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line2 = <span style="color: #a31515">"children 1 line 2"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line3 = <span style="color: #a31515">"children 1 line 3"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    City = <span style="color: #a31515">"children 1 city"</span></span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                },</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">new</span> <span style="color: #2b91af">TestChildObject</span>() { </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line1 = <span style="color: #a31515">"children 2 line 1"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line2 = <span style="color: #a31515">"children 2 line 2"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    Line3 = <span style="color: #a31515">"children 2 line 3"</span>,</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    City = <span style="color: #a31515">"children 2 city"</span></span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                             }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            };</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: green">// Get our json string </span></span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">string</span> json = <span style="color: #2b91af">JsonConvert</span>.SerializeObject(testObject);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: green">// Create the json.Net Linq object for our json string</span></span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">JObject</span> jsonObject = <span style="color: #2b91af">JObject</span>.Parse(json);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: green">// eval into an expando</span></span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">dynamic</span> dynObject = ConvertJTokenToObject(jsonObject);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.IsNotNull(dynObject);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.IsNotInstanceOfType(dynObject, <span style="color: blue">typeof</span>(<span style="color: #2b91af">TestObject</span>));</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.IsInstanceOfType(dynObject, <span style="color: blue">typeof</span>(<span style="color: #2b91af">ExpandoObject</span>));</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.FirstName, dynObject.FirstName);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.LastName, dynObject.LastName);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.DateOfBirth, dynObject.DateOfBirth);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.IsNotNull(dynObject.Child);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Child.Line1, dynObject.Child.Line1);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Child.Line2, dynObject.Child.Line2);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Child.Line3, dynObject.Child.Line3);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.IsNotNull(dynObject.Children);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Children.Count, dynObject.Children.Length);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">for</span> (<span style="color: blue">int</span> i = <span style="color: brown">0</span>; i &lt; testObject.Children.Count; i++) {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Children[i].Line1, dynObject.Children[i].Line1);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Children[i].Line2, dynObject.Children[i].Line2);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: #2b91af">Assert</span>.AreEqual(testObject.Children[i].Line3, dynObject.Children[i].Line3);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">        }</span></p>
+<p class="MsoNormal"> </p>
+</p></div>
+<div class="Section1">
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">        <span style="color: blue">public</span> <span style="color: blue">object</span> ConvertJTokenToObject(<span style="color: #2b91af">JToken</span> token) {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">if</span> (token <span style="color: blue">is</span> <span style="color: #2b91af">JValue</span>) { </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">return</span> ((<span style="color: #2b91af">JValue</span>)token).Value;</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">if</span> (token <span style="color: blue">is</span> <span style="color: #2b91af">JObject</span>) { </span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: #2b91af">ExpandoObject</span> expando = <span style="color: blue">new</span> <span style="color: #2b91af">ExpandoObject</span>();</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                (<span style="color: blue">from</span> childToken <span style="color: blue">in</span> ((<span style="color: #2b91af">JToken</span>)token) <span style="color: blue">where</span> childToken <span style="color: blue">is</span> <span style="color: #2b91af">JProperty</span> <span style="color: blue">select</span> childToken <span style="color: blue">as</span> <span style="color: #2b91af">JProperty</span>).ToList().ForEach(property =&gt; {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    ((<span style="color: #2b91af">IDictionary</span>&lt;<span style="color: blue">string</span>, <span style="color: blue">object</span>&gt;)expando).Add(property.Name, ConvertJTokenToObject(property.Value));</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                });</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">return</span> expando;</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">if</span>(token <span style="color: blue">is</span> <span style="color: #2b91af">JArray</span>){</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">object</span>[] array = <span style="color: blue">new</span> <span style="color: blue">object</span>[((<span style="color: #2b91af">JArray</span>)token).Count];</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">int</span> index = <span style="color: brown">0</span>;</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">foreach</span> (<span style="color: #2b91af">JToken</span> arrayItem <span style="color: blue">in</span> ((<span style="color: #2b91af">JArray</span>)token)) {</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    array[index] = ConvertJTokenToObject(arrayItem);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                    index++;</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">                <span style="color: blue">return</span> array;</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">            <span style="color: blue">throw</span> <span style="color: blue">new</span> <span style="color: #2b91af">ArgumentException</span>(<span style="color: blue">string</span>.Format(<span style="color: #a31515">"Unknown token type '{0}'"</span>, token.GetType()), <span style="color: #a31515">"token"</span>);</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt">        }</span></p>
+<p style="line-height: normal; margin-bottom: 0pt" class="MsoNormal"><span style="font-family: consolas; font-size: 9.5pt"> </span></p>
+<p class="MsoNormal"> </p>
+</p></div>

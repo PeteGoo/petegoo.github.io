@@ -1,0 +1,28 @@
+---
+layout: post
+title: Assembly File Locking when using AppDomains in a Visual Studio package
+categories:
+- C#
+- Visual Studio
+- VSX
+tags:
+- VSX
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>Recently I was using a new AppDomain from within a Visual Studio package to reflect over a dll and get some metadata. I then unloaded the AppDomain expecting that the file locks on the dll file would be released…..but they weren’t.</p>
+<p>I could see that another AppDomain in VS was holding a lock on my file. You can see this by switching on Native debugging when attaching another visual studio instance and from the immediate window use:</p>
+<blockquote><p><font style="background-color: #ffffff">.load sos</font></p>
+<p><font style="background-color: #ffffff">!dumpdomain</font></p>
+</blockquote>
+<p>It turns out this is due to the <a href="http://msdn.microsoft.com/en-us/library/system.appdomainsetup.loaderoptimization(v=vs.80).aspx" target="_blank">LoaderOptimization</a> attribute. Set this property to SingleDomain on your AppDomainSetup object to allow the file lock to be freed when unloading your AppDomain. This translates as.</p>
+<blockquote><p><em>Indicates that the application will probably have a single domain, and loader must not share internal resources across application domains. </em></p>
+</blockquote>

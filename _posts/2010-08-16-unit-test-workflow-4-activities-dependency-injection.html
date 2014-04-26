@@ -1,0 +1,198 @@
+---
+layout: post
+title: 'Unit Test Workflow 4 Activities : Dependency Injection'
+categories:
+- C#
+- Main Page
+- Unit Testing
+- Visual Studio
+- WF4
+tags:
+- TDD
+- Unit Testing
+- WF
+- Workflow
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>At first glance unit testing workflow activities with <a title="Martin Fowler on Dependency Injection" href="http://martinfowler.com/articles/injection.html" target="_blank">dependency injection</a> seems like a no-brainer. For example consider the following activity using constructor-based dependency injection.</p>
+<pre class="code"><font size="2"><span style="color: blue">public class </span><span style="color: #2b91af">SendEmail </span>: <span style="color: #2b91af">CodeActivity </span>{
+    <span style="color: blue">private readonly </span><span style="color: #2b91af">IEmailClient </span>emailClient;
+
+    <span style="color: blue">public </span>SendEmail() : <span style="color: blue">this</span>(<span style="color: blue">new </span><span style="color: #2b91af">EmailClient</span>()) {}
+
+    <span style="color: blue">public </span>SendEmail(<span style="color: #2b91af">IEmailClient </span>emailClient) {
+        <span style="color: blue">this</span>.emailClient = emailClient;
+    }
+
+    <span style="color: blue">public </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: blue">string</span>&gt; To { <span style="color: blue">get</span>; <span style="color: blue">set</span>; }
+
+    <span style="color: blue">public </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: blue">string</span>&gt; From { <span style="color: blue">get</span>; <span style="color: blue">set</span>; }
+
+    <span style="color: blue">public </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: blue">string</span>&gt; Subject { <span style="color: blue">get</span>; <span style="color: blue">set</span>; }
+
+    <span style="color: blue">public </span><span style="color: #2b91af">InArgument</span>&lt;<span style="color: blue">string</span>&gt; Message { <span style="color: blue">get</span>; <span style="color: blue">set</span>; }
+
+    <span style="color: blue">protected override void </span>Execute(<span style="color: #2b91af">CodeActivityContext </span>context) {
+        emailClient.SendEmail(
+            To.Get(context),
+            From.Get(context),
+            Subject.Get(context),
+            Message.Get(context)
+            );
+    }
+}
+
+<span style="color: blue">public interface </span><span style="color: #2b91af">IEmailClient </span>{
+    <span style="color: blue">void </span>SendEmail(<span style="color: blue">string </span>to, <span style="color: blue">string </span>from, <span style="color: blue">string </span>subject, <span style="color: blue">string </span>message);
+}
+
+<span style="color: blue">public class </span><span style="color: #2b91af">EmailClient </span>: <span style="color: #2b91af">IEmailClient </span>{
+    <span style="color: blue">public void </span>SendEmail(<span style="color: blue">string </span>to, <span style="color: blue">string </span>from, <span style="color: blue">string </span>subject, <span style="color: blue">string </span>message) {
+        <span style="color: blue">throw new </span><span style="color: #00008b">NotImplementedException</span>();
+    }
+}
+</font></pre>
+<p> </p>
+<p>I have an email client but I choose to write my tests so that I can replace the implementation of IEmailClient such that I can stub or mock the implementation out as below. This is absolutely necessary for unit testing as we cannot have our real implementation of the Email Client sending emails when we run our unit tests. Therefore we swap out with a stub implementation that simply logs the fact that we have called SendEmail.</p>
+<pre class="code"><font size="2">[<span style="color: #2b91af">TestMethod</span>]
+<span style="color: blue">public void </span>ExecuteCallsSendEmailOnClient() {
+    <span style="color: #2b91af">StubEmailClient </span>stubEmailClient = <span style="color: blue">new </span><span style="color: #2b91af">StubEmailClient</span>();
+    <span style="color: #2b91af">WorkflowInvoker</span>.Invoke(
+        <span style="color: blue">new </span><span style="color: #2b91af">SendEmail</span>(
+            stubEmailClient) {
+                                       From = <span style="color: #a31515">"foo@foo.com"</span>,
+                                       To = <span style="color: #a31515">"bar@bar.com"</span>,
+                                       Subject = <span style="color: #a31515">"The Subject"</span>,
+                                       Message = </font><font size="2"><span style="color: #a31515">"The Message"
+                                   </span>});
+
+    <span style="color: #2b91af">Assert</span>.AreEqual(1, stubEmailClient.SentEmails);
+}
+
+<span style="color: blue">private class </span><span style="color: #2b91af">StubEmailClient </span>: <span style="color: #2b91af">IEmailClient </span>{
+    <span style="color: blue">private int </span>sentEmails;
+    <span style="color: blue">public int </span>SentEmails {
+        <span style="color: blue">get </span>{ <span style="color: blue">return </span>sentEmails; }
+    }
+    <span style="color: blue">public void </span>SendEmail(<span style="color: blue">string </span>to, <span style="color: blue">string </span>from, <span style="color: blue">string </span>subject, <span style="color: blue">string </span>message) {
+        sentEmails++;
+    }
+}</font></pre>
+<p> </p>
+<p>So great! Now we have unit tested our activity and all is good with the world, no different from any other unit testing, right? But what if I have a workflow activity written in XAML that uses my SendEmail activity. </p>
+<pre class="code"><font size="2"><span style="color: blue">&lt;</span><span style="color: #a31515">Activity </span><span style="color: red">mc:Ignorable</span><span style="color: blue">=</span>"<span style="color: blue">sap</span>"
+          <span style="color: red">x:Class</span><span style="color: blue">=</span>"<span style="color: blue">PeteGoo.TimeService.Activities.SendMultipleEmails</span>"
+          <span style="color: red">xmlns</span><span style="color: blue">=</span>"<span style="color: blue">http://schemas.microsoft.com/netfx/2009/xaml/activities</span>"
+          <span style="color: red">xmlns:local</span><span style="color: blue">=</span>"<span style="color: blue">clr-namespace:PeteGoo.TimeService.Activities</span>"
+          <span style="color: red">xmlns:mc</span><span style="color: blue">=</span>"<span style="color: blue">http://schemas.openxmlformats.org/markup-compatibility/2006</span>" 
+          <span style="color: red">xmlns:mva</span><span style="color: blue">=</span>"<span style="color: blue">clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities</span>" 
+          <span style="color: red">xmlns:sad</span><span style="color: blue">=</span>"<span style="color: blue">clr-namespace:System.Activities.Debugger;assembly=System.Activities</span>"
+          <span style="color: red">xmlns:sap</span><span style="color: blue">=</span>"<span style="color: blue">http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation</span>" 
+          <span style="color: red">xmlns:x</span><span style="color: blue">=</span>"<span style="color: blue">http://schemas.microsoft.com/winfx/2006/xaml</span>"</font><font size="2"><span style="color: blue">&gt;
+  &lt;</span><span style="color: #a31515">x:</span><span style="color: red">Members</span></font><font size="2"><span style="color: blue">&gt;
+    &lt;</span><span style="color: #a31515">x:</span><span style="color: red">Property Name</span><span style="color: blue">=</span>"<span style="color: blue">FromAddress</span>"
+                <span style="color: red">Type</span><span style="color: blue">=</span>"<span style="color: blue">InArgument(x:String)</span>" </font><font size="2"><span style="color: blue">/&gt;
+    &lt;</span><span style="color: #a31515">x:</span><span style="color: red">Property Name</span><span style="color: blue">=</span>"<span style="color: blue">Subject</span>"
+                <span style="color: red">Type</span><span style="color: blue">=</span>"<span style="color: blue">InArgument(x:String)</span>" </font><font size="2"><span style="color: blue">/&gt;
+    &lt;</span><span style="color: #a31515">x:</span><span style="color: red">Property Name</span><span style="color: blue">=</span>"<span style="color: blue">Message</span>"
+                <span style="color: red">Type</span><span style="color: blue">=</span>"<span style="color: blue">InArgument(x:String)</span>" </font><font size="2"><span style="color: blue">/&gt;
+    &lt;</span><span style="color: #a31515">x:</span><span style="color: red">Property Name</span><span style="color: blue">=</span>"<span style="color: blue">ToAddresses</span>"
+                <span style="color: red">Type</span><span style="color: blue">=</span>"<span style="color: blue">InArgument(s:String[])</span>" </font><font size="2"><span style="color: blue">/&gt;
+  &lt;/</span><span style="color: #a31515">x:</span><span style="color: red">Members</span></font><font size="2"><span style="color: blue">&gt;
+  &lt;</span><span style="color: #a31515">ForEach </span><span style="color: red">x:TypeArguments</span><span style="color: blue">=</span>"<span style="color: blue">x:String</span>"
+           <span style="color: red">DisplayName</span><span style="color: blue">=</span>"<span style="color: blue">ForEach</span><span style="color: red">&amp;lt;</span><span style="color: blue">String</span><span style="color: red">&amp;gt;</span>"
+           <span style="color: red">sad:XamlDebuggerXmlReader.FileName</span><span style="color: blue">=</span>"<span style="color: blue">E:\Code\Blog\UnitTestingActivities\PeteGoo.TimeService.Activities\SendMultipleEmails.xaml</span>"
+           <span style="color: red">sap:VirtualizedContainerService.HintSize</span><span style="color: blue">=</span>"<span style="color: blue">287,206</span>"
+           <span style="color: red">Values</span><span style="color: blue">=</span>"<span style="color: blue">[ToAddresses]</span>"</font><font size="2"><span style="color: blue">&gt;
+    &lt;</span><span style="color: #a31515">ActivityAction </span><span style="color: red">x:TypeArguments</span><span style="color: blue">=</span>"<span style="color: blue">x:String</span>"</font><font size="2"><span style="color: blue">&gt;
+      &lt;</span><span style="color: #a31515">ActivityAction.</span><span style="color: red">Argument</span></font><font size="2"><span style="color: blue">&gt;
+        &lt;</span><span style="color: #a31515">DelegateInArgument </span><span style="color: red">x:TypeArguments</span><span style="color: blue">=</span>"<span style="color: blue">x:String</span>"
+                            <span style="color: red">Name</span><span style="color: blue">=</span>"<span style="color: blue">toAddress</span>" </font><font size="2"><span style="color: blue">/&gt;
+      &lt;/</span><span style="color: #a31515">ActivityAction.</span><span style="color: red">Argument</span></font><font size="2"><span style="color: blue">&gt;
+      &lt;</span><span style="color: #a31515">local:SendEmail </span><span style="color: red">From</span><span style="color: blue">=</span>"<span style="color: blue">[FromAddress]</span>"
+                       <span style="color: red">sap:VirtualizedContainerService.HintSize</span><span style="color: blue">=</span>"<span style="color: blue">257,100</span>"
+                       <span style="color: red">Message</span><span style="color: blue">=</span>"<span style="color: blue">[Message]</span>"
+                       <span style="color: red">Subject</span><span style="color: blue">=</span>"<span style="color: blue">[Subject]</span>"
+                       <span style="color: red">To</span><span style="color: blue">=</span>"<span style="color: blue">[toAddress]</span>" </font><font size="2"><span style="color: blue">/&gt;
+    &lt;/</span><span style="color: #a31515">ActivityAction</span></font><font size="2"><span style="color: blue">&gt;
+  &lt;/</span><span style="color: #a31515">ForEach</span></font><font size="2"><span style="color: blue">&gt;
+&lt;/</span><span style="color: #a31515">Activity</span></font><span style="color: blue"><font size="2">&gt;
+</font></span></pre>
+<p>Now suppose I want to test my XAML activity, how can I use dependency injection? XAML is now in control of the construction, so I cannot use constructor based Dependency Injection. This is a big problem as we really want to use the composition model that WF4 provides us and the declarative programming model of XAML but that stops us from using familiar unit testing techniques. Yes, there are other types of dependency injection but maybe workflow extensions can be useful here.Workflow Extensions allow us to provide common services in a Service Locator pattern built into the execution context. Typically they are used for Tracking Participants and Persistence Participants which are recognised as they implement a well known contract, in this case however we are going to take advantage of the fact that workflow extensions can be any arbitrary type. Consider the following workflow extension and the associated Extension method.</p>
+<pre class="code"><font size="2"><span style="color: blue">public class </span><span style="color: #2b91af">DependencyInjectionExtension </span>{
+
+    <span style="color: blue">private readonly </span><span style="color: #2b91af">Dictionary</span>&lt;<span style="color: #2b91af">Type</span>, <span style="color: blue">object</span>&gt; dependencies = <span style="color: blue">new </span><span style="color: #2b91af">Dictionary</span>&lt;<span style="color: #2b91af">Type</span>, <span style="color: blue">object</span>&gt;();
+    <span style="color: blue">public void </span>AddDependency&lt;T&gt;(T instance) {
+        dependencies.Add(<span style="color: blue">typeof</span>(T), instance);
+    }
+
+    <span style="color: blue">public </span>T GetDependency&lt;T&gt;(<span style="color: #2b91af">Func</span>&lt;T&gt; defaultFunc) <span style="color: blue">where </span>T : <span style="color: blue">class </span>{
+        <span style="color: blue">if </span>(dependencies.ContainsKey(<span style="color: blue">typeof</span>(T))) {
+            <span style="color: blue">return </span>dependencies[<span style="color: blue">typeof </span>(T)] <span style="color: blue">as </span>T;
+        }
+
+        <span style="color: blue">return </span>defaultFunc();
+    }
+}
+
+<span style="color: blue">public static class </span><span style="color: #2b91af">ActivityContextExtensions </span>{
+    <span style="color: blue">public static </span>T GetDependency&lt;T&gt;(<span style="color: blue">this </span><span style="color: #2b91af">ActivityContext </span>context, <span style="color: #2b91af">Func</span>&lt;T&gt; defaultFunc) <span style="color: blue">where </span>T : <span style="color: blue">class </span>{
+        <span style="color: #2b91af">DependencyInjectionExtension </span>extension = context.GetExtension&lt;<span style="color: #2b91af">DependencyInjectionExtension</span>&gt;();
+        
+        <span style="color: blue">return </span>extension == <span style="color: blue">null </span>? defaultFunc() : extension.GetDependency&lt;T&gt;(defaultFunc);
+        
+    }
+}</font></pre>
+<p> </p>
+<p>Now we can use this extension and the extension method to change our Execute implementation to the following.</p>
+<pre class="code"><font size="2"><span style="color: blue">protected override void </span>Execute(<span style="color: #2b91af">CodeActivityContext </span>context) {
+    <span style="color: #2b91af">IEmailClient </span>client = context.GetDependency&lt;<span style="color: #2b91af">IEmailClient</span>&gt;(() =&gt; <span style="color: blue">new </span><span style="color: #2b91af">EmailClient</span>());
+
+    client.SendEmail(
+        To.Get(context),
+        From.Get(context),
+        Subject.Get(context),
+        Message.Get(context)
+        );
+}</font></pre>
+<p> </p>
+<p>This shows that we will ask the GetDependency extension method for a certain service (IEmailClient) and if it has not been specified simply use a new EmailClient instance. The extension method in turn, checks whether the extension has been added and if so asks it for the dependency. If the extension is not present or it does not contain a dependency for our type then the supplied func is called which will return that EmailClient instance. And our test is as follows:</p>
+<pre class="code"><font size="2">[<span style="color: #2b91af">TestMethod</span>]
+<span style="color: blue">public void </span>ExecuteCallsSendEmailOnClient() {
+    <span style="color: #2b91af">StubEmailClient </span>stubEmailClient = <span style="color: blue">new </span><span style="color: #2b91af">StubEmailClient</span>();
+
+    <span style="color: #2b91af">WorkflowInvoker </span>invoker = <span style="color: blue">new </span><span style="color: #2b91af">WorkflowInvoker</span>(
+        <span style="color: blue">new </span><span style="color: #2b91af">SendEmail </span>{
+                                       From = <span style="color: #a31515">"foo@foo.com"</span>,
+                                       To = <span style="color: #a31515">"bar@bar.com"</span>,
+                                       Subject = <span style="color: #a31515">"The Subject"</span>,
+                                       Message = </font><font size="2"><span style="color: #a31515">"The Message"
+                                   
+        </span>});
+
+    <span style="color: #2b91af">DependencyInjectionExtension </span>dependencyInjectionExtension = <span style="color: blue">new </span><span style="color: #2b91af">DependencyInjectionExtension</span>();
+    dependencyInjectionExtension.AddDependency&lt;<span style="color: #2b91af">IEmailClient</span>&gt;(stubEmailClient);
+
+    invoker.Extensions.Add(dependencyInjectionExtension);
+
+    invoker.Invoke();
+
+    <span style="color: #2b91af">Assert</span>.AreEqual(1, stubEmailClient.SentEmails);
+}</font></pre>
+<p> </p>
+<p>So now we have implemented a dependency injection pattern explicitly for workflow activities. We can now test composite XAML or code-based activities as well as ordinary code activities without requiring that we stay in control of the construction of our object instances.</p>
+<div class="xdownload">
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:F60BB8FA-6F02-4999-8F5E-9DD4E92C4DA7:f0b4dfdc-efb7-45e7-b0fe-73569988a506" class="wlWriterEditableSmartContent">
+<div><a href="http://blog.petegoo.com/wp-content/uploads/2011/10/UnitTestingActivities.zip" target="_self">UnitTestingActivities.zip</a></div>
+</div>
+</div>

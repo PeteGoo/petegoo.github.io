@@ -1,0 +1,241 @@
+---
+layout: post
+title: Creating a .Net queryable client for ASP.Net Web API oData services
+categories:
+- C#
+- MVC
+- ODAta
+- Web API
+tags:
+- Linq
+- Linq2Rest
+- REST
+- Web API
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<h5>TL;DR: How to create a client Linq api for querying IQueryable ASP.Net Web API rest services in very few lines of code using JSON.Net and Linq2Rest.</h5>
+<p>&#160;</p>
+<p>The <a href="http://www.asp.net/mvc/mvc4" target="_blank">ASP.Net MVC4 Beta</a> was released recently and included the Beta release of <a title="ASP.Net Web API" href="http://www.asp.net/web-api" target="_blank">ASP.Net Web API</a>, formally known as the WCF Web API. Lots of people have already talked about the benefits of the Web API and how it has been built with <a title="Problem Solver on ASP.Net Web API" href="http://msmvps.com/blogs/theproblemsolver/archive/2012/03/09/getting-started-with-the-asp-net-web-api.aspx" target="_blank">simplicity</a>, <a title="WCF Web API on codeplex" href="http://wcf.codeplex.com/wikipage?title=WCF%20HTTP" target="_blank">transparency</a>, <a title="plugging in a JSON.Net formatter for Web API" href="http://blogs.msdn.com/b/henrikn/archive/2012/02/18/using-json-net-with-asp-net-web-api.aspx" target="_blank">extensibility</a> and <a title="ScottGu on web api" href="http://weblogs.asp.net/scottgu/archive/2012/02/23/asp-net-web-api-part-1.aspx" target="_blank">testability</a> in mind so I’ll not go into too many details about that here. </p>
+<h3>Using ASP.Net Web Api instead of WCF Data Services</h3>
+<h3></h3>
+<p>One of the features that excites me about Web Api is the ability to expose an IQueryable on a Rest service and have Web Api automatically map queries in oData uri format to actual linq queries on the source i expose. For example, if my Web API controller looks like this:</p>
+<pre class="brush: csharp;">public class PeopleController : ApiController {
+    public IQueryable&lt;Person&gt; GetModels() {
+
+        return people.AsQueryable();
+    }
+
+    private readonly Person[] people = new Person[] {
+            new Person {
+                Id = 1,
+                FirstName = &quot;Peter&quot;,
+                LastName = &quot;Goodman&quot;
+            }, 
+            new Person {
+                Id = 2,
+                FirstName = &quot;Peter&quot;,
+                LastName = &quot;Skeeter&quot;
+            }, 
+            new Person {
+                Id = 3,
+                FirstName = &quot;Tony&quot;,
+                LastName = &quot;Stark&quot;
+            }, 
+            new Person {
+                Id = 4,
+                FirstName = &quot;Frank&quot;,
+                LastName = &quot;Grimes&quot;
+            }, 
+            new Person {
+                Id = 5,
+                FirstName = &quot;Doug&quot;,
+                LastName = &quot;Kettle&quot;
+            }, 
+            new Person {
+                Id = 6,
+                FirstName = &quot;Finbar&quot;,
+                LastName = &quot;Coole&quot;
+            }, 
+        };
+}</pre>
+<p>&#160;</p>
+<p>Web Api will now let me access this resource and query it using oData syntax e.g.:</p>
+<p><em>/api/People?$filter=FirstName eq ‘Peter'&amp;$orderby=LastName desc</em></p>
+<p>This of course is just like the kind of thing you get out of WCF Data Services with a couple of very important differences.</p>
+<ul>
+<li>Web API does not currently support all of the features of oData, e.g. projection and expand</li>
+<li><strong>Web API is highly configurable and extensible.</strong></li>
+<li>Web API does not currently have a formatter Atom+Xml format, although an implementation is on the <a title="The ASP.Net MVC Roadmap" href="http://aspnet.codeplex.com/wikipage?title=asp.net%20mvc%204%20roadmap" target="_blank">roadmap</a></li>
+<li><strong>There currently is no built in .Net client api for issuing Linq queries to Web API rest services</strong></li>
+</ul>
+<p>One of the pains of WCF Data Services has been the inability to configure or extend the implementation, for example it is very difficult or impossible to add your own formatter/serializer. With Web API, this kind of stuff is almost trivial.</p>
+<p>The WCF Data Services client API (DataServiceContext) only allows you to use Atom+Xml which for a lot of purposes is extremely bloated in comparison to something like <a title="Javascript Object Notation" href="http://www.json.org/" target="_blank">JSON</a> or <a title="Google&#39;s Protocol Buffers" href="http://code.google.com/p/protobuf/" target="_blank">protobuf</a>.</p>
+<p>Unfortunately there also is no equivalent to the DataServiceContext that allows you to query the above service in Web API, therefore you cannot use LINQ to query the above service. This is what we are going to build. </p>
+<h3>Setting up the project</h3>
+<p>Make sure you have ASP.Net MVC4 Beta installed and create a new ASP.Net MVC 4 application project. When you get prompted for the Project Template make sure to choose “Web API” and hit OK.</p>
+<p>Under models add a new class called Person and add the following code.</p>
+<pre class="brush: csharp;">public class Person {
+    public int Id { get; set; }
+
+    public string FirstName { get; set; }
+
+    public string LastName { get; set; }
+}</pre>
+<p>Change the name of the ValuesController in the Controllers folder to PeopleController and add the code at the start of this article.</p>
+<p>Run your project and in the browser change the url to something like the following remembering to use the hostname and port of your own project:</p>
+<p><em>http://localhost:21449/api/People</em></p>
+<p>You should see a list of the people we have defined.</p>
+<p>Now we should be able to change this to the following to see only the ‘Peter’s</p>
+<p><em>http://localhost:21449/api/People?$filter=FirstName = 'Peter'</em></p>
+<p>You will notice that the output is in Xml. We want to customize this to allow Json</p>
+<h3></h3>
+<h3>Creating the JSON.Net formatter</h3>
+<p>To create a json formatted output for our service we are going to use JSON.Net, the Web API team have already said that they are going to ship with JSON.Net as the default JSON formatter when it goes RTM. Therefore you can skip this section if you are working with the RTM version.</p>
+<p>Firstly, using <a title="Nuget package manager" href="http://www.nuget.org/" target="_blank">Nuget package manager</a>, add a package dependency to your project on JSON.Net</p>
+<p>Create a folder in your web project called Infrastructure and add a class called JsonNetFormatter. Paste in the code for this class only from <a title="Henrik on Using JSON.Net with ASP.Net Web API" href="http://blogs.msdn.com/b/henrikn/archive/2012/02/18/using-json-net-with-asp-net-web-api.aspx" target="_blank">Henrik’s article on the subject</a>.</p>
+<p>In the global.asax.cs file in your project add the following code in the RegisterRoutes method to register the JSON.Net formatter before the current default one. </p>
+<pre class="brush: csharp;">JsonSerializerSettings serializerSettings = new JsonSerializerSettings();
+serializerSettings.Converters.Add(new IsoDateTimeConverter());
+
+HttpConfiguration configuration = GlobalConfiguration.Configuration;
+
+configuration.Formatters.Insert(0, new JsonNetFormatter(serializerSettings));</pre>
+<p>You can test that works in <a title="Fiddler" href="http://fiddler2.com/fiddler2/" target="_blank">fiddler2</a> by starting fiddler, re-running the previous query in the browser (you may need to replace the hostname with ipv4.fiddler to see it), drag the session into the composer tab and change the accept header to </p>
+<p><em>Accept: application/json</em></p>
+<p>You should now see that we have JSON output.</p>
+<h3>Creating the client application and api</h3>
+<p>Add a new console application project to your solution named something sensible. This is going to be our .Net client.</p>
+<p>To create our client side code we are going to need something that can take a LINQ query and convert it to the <a title="OData URI Conventions" href="http://www.odata.org/developers/protocols/uri-conventions" target="_blank">oData URI format</a>. In another project I am working on I have recently been using the excellent <a title="Linq2Rest on BitBucket" href="https://bitbucket.org/jjrdk/linq2rest" target="_blank">Linq2Rest</a> library written by <a title="Jacob Reimers&#39; Blog" href="http://www.reimers.dk/" target="_blank">Jacob Reimers</a>. He has written Linq2Rest to solve the problem of converting between IQueryables and OData URIs. Unfortunately the client and server pieces for Linq2Rest are in the same assembly so you will need to make your console app targets .Net 4.0 instead of the client profile in the project properties in order to support the dependency on System.Web.</p>
+<p>Add a nuget package reference in your console app to Linq2Rest and Json.Net. </p>
+<p>Next we need to create a matching JSON.Net deserializer for the Linq2Rest library so that it will match our server side implementation. This is just to ensure compatibility, you could of course reference the same common serializer settings etc. Create a folder in your console app called Infrastructure and add the following code for the JsonNetSerializerFactory and it’s serializer.</p>
+<pre class="brush: csharp;">public class JsonNetSerializerFactory : ISerializerFactory {
+    public ISerializer&lt;T&gt; Create&lt;T&gt;() {
+        return new JsonNetSerializer&lt;T&gt;();
+    }
+
+    public class JsonNetSerializer&lt;T&gt; : ISerializer&lt;T&gt; {
+        public T Deserialize(string input) {
+            return JsonConvert.DeserializeObject&lt;T&gt;(input);
+        }
+
+        public IList&lt;T&gt; DeserializeList(string input) {
+            return JsonConvert.DeserializeObject&lt;IList&lt;T&gt;&gt;(input);
+        }
+    }
+}</pre>
+<p>&#160;</p>
+<p>Now we are ready to create our equivalent of the DataServiceContext. Add a new class to that project called PeopleContext and fill it out with the following code.</p>
+<pre class="brush: csharp;">public class PeopleContext {
+    private readonly RestContext&lt;Person&gt; restContext;
+
+    public PeopleContext(Uri uri, Format format) {
+        restContext = new RestContext&lt;Person&gt;(GetRestClient(uri, format), GetSerializerFactory(format));
+    }
+
+    public enum Format {
+        Pox,
+        Json
+    }
+
+    public static IRestClient GetRestClient(Uri uri, Format format) {
+        switch (format) {
+            case Format.Pox:
+                return new XmlRestClient(uri);
+            case Format.Json:
+                return new JsonRestClient(uri);
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    public static ISerializerFactory GetSerializerFactory(Format format) {
+        switch (format) {
+            case Format.Pox:
+                return new XmlSerializerFactory(knownTypes);
+            case Format.Json:
+                return new JsonNetSerializerFactory();
+
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    private static readonly IEnumerable&lt;Type&gt; knownTypes = new[] {
+        typeof (Person)
+    };
+
+    public IQueryable&lt;Person&gt; People {
+        get { return restContext.Query; }
+    }
+
+}</pre>
+<p>Now we are ready to consume our new fancy pants context class. In the Program.cs add the following code to query the service and display the results. Remember to replace the hostname and port with your settings. I’ve used the ipv4.fiddler address to force fiddler to log the session, this of course won’t work if you don’t have fiddler running.</p>
+<pre class="brush: csharp;">class Program {
+    static void Main(string[] args) {
+        PrintQuery(PeopleContext.Format.Pox);
+        PrintQuery(PeopleContext.Format.Json);
+
+        Console.ReadKey(true);
+    }
+
+    private static void PrintQuery(PeopleContext.Format wireFormat) {
+        Console.WriteLine();
+        Console.WriteLine(&quot;*** Querying in {0} format ***&quot;, wireFormat);
+        Console.WriteLine();
+
+        // Perform Query
+        new PeopleContext(new Uri(&quot;http://ipv4.fiddler:14061/api/People&quot;), wireFormat)
+            .People
+            .Where(model =&gt; model.FirstName.StartsWith(&quot;Pe&quot;))
+            .ToList()
+            .ForEach(item =&gt; {
+                Console.WriteLine(&quot;-----------------------------------&quot;);
+                Console.WriteLine(&quot;Id:{0}&quot;, item.Id);
+                Console.WriteLine(&quot;First Name:{0}&quot;, item.FirstName);
+                Console.WriteLine(&quot;Last Name:{0}&quot;, item.LastName);
+            });
+        Console.WriteLine(&quot;-----------------------------------&quot;);
+    }
+}</pre>
+<p>&#160;</p>
+<p>Run the console app and you should see:</p>
+<blockquote>
+<p>
+    </p>
+<p>
+    <br />*** Querying in Pox format ***</p>
+<p>-----------------------------------<br />
+    <br />Id:1</p>
+<p>First Name:Peter</p>
+<p>Last Name:Goodman</p>
+<p>-----------------------------------</p>
+<p>Id:2</p>
+<p>First Name:Peter</p>
+<p>Last Name:Skeeter</p>
+<p>-----------------------------------</p>
+<p>*** Querying in Json format ***</p>
+<p>-----------------------------------<br />
+    <br />Id:1</p>
+<p>First Name:Peter</p>
+<p>Last Name:Goodman</p>
+<p>-----------------------------------</p>
+<p>Id:2</p>
+<p>First Name:Peter</p>
+<p>Last Name:Skeeter</p>
+<p>-----------------------------------</p>
+<p>
+    </p>
+</blockquote>
+<p>&#160;</p>
+<p>And we’re done. You should be able to see in fiddler now that we have issued a request in each format (Xml and Json) and received the appropriate format in your response. I have even used this approach to implement a protobuf-net version for even greater speed and reduced payload.</p>
+<p>You can get the source for this sample on GitHub</p>
+<p><a href="https://github.com/PeteGoo/WebApiContext.Sample">https://github.com/PeteGoo/WebApiContext.Sample</a></p>

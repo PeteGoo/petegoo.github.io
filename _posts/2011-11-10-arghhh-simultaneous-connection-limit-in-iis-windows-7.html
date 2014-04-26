@@ -1,0 +1,23 @@
+---
+layout: post
+title: Arghhh! Simultaneous Connection Limit in IIS (Windows 7)
+categories:
+- ASP.Net
+- C#
+tags:
+- ASP.Net
+- IIS
+- SignalR
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I’ve been playing with <a title="SignalR" href="https://github.com/SignalR" target="_blank">SignalR</a> recently and it drives me nuts that I can’t have more than a few simultaneous long polling requests open to the IIS server on Windows 7. It stops responding after about 2 clients. Even IIS Express supports unlimited simultaneous connections but we need AppFabric support.</p>
+<p>We would seriously consider using it for our messaging solution but on a single machine developer install, we would need to come up with another solution for our many client apps.</p>

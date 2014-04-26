@@ -1,0 +1,38 @@
+---
+layout: post
+title: Getting Entity Framework and MySQL to play nice on my Hosting Provider
+categories:
+- ASP.Net
+- C#
+- Entity Framework
+- MVC
+- MySQL
+- WCF
+tags: []
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>After moving my blog to wordpress, I decided to update the recent posts section on my main site to point to the wordpress repository instead of the old SubText one. SubText was using MSSQL but Wordpress is using MySQL so I had to get things strung together again.</p>
+<p>For the original code talking to the SubText repository I had created an EDMX and simply queried against it using LINQ to extract the top 5 most recent blog posts and display them on my sites main page. </p>
+<p>The first thing I figured I would have to do is to find a connector for MySQL to allow the Entity Framework to talk to MySQL. A <a href="http://www.google.co.nz/search?sourceid=chrome&amp;ie=UTF-8&amp;q=entity+framework+mySql" target="_blank">quick google</a> supplied me with the location to go pick that provider up <a href="http://www.mysql.com/downloads/connector/net" target="_blank">directly from the guys at MySQL</a>.Once that was installed I had to restart VS2010 and go through the process of adding a new EDMX model for the WordPress repository. Once that was done I had to change some of the nonsensical casing and naming in the Entity list, the model namespace and entities class.</p>
+<p>I added a quick WCF Data Service and used <a href="http://www.linqpad.net/" target="_blank">LinqPad</a> to prove that everything was working. I then updated the query in my home page to talk to the new entities source. So far, so good. Time to upload to my hosting provider and job done.</p>
+<p>Now this is where things got a little pear shaped. Firstly I received the following error.</p>
+<blockquote><p>Unable to find the requested .Net Framework Data Provider. It may not be installed.</p>
+</blockquote>
+<p>OK I figured, I looked at my local project and I had no references to anything MySql, therefore I added the references and set them to copy local, then re-deployed. Same thing.</p>
+<p>Next I did a bit more googling.&#160; At this point I should make it clear that I’m using WinHost as my hosting provider, they are really good, they seem to be pretty responsive on their forums and I can mostly find the answers I need (without ever having to ask them directly) when it comes to getting some relatively new tech working on their kit. Therefore I came across <a href="http://forum.winhost.com/showthread.php?t=7740" target="_blank">this forum post</a> which pointed me to the fact that I had to add this config section in my web.config (remember to change the assembly version to whichever you have downloaded from MySQL).</p>
+<blockquote><p>&lt;configuration&gt;<br />&#160; &lt;system.data&gt;<br />&#160;&#160;&#160; &lt;DbProviderFactories&gt;<br />&#160;&#160;&#160;&#160;&#160; &lt;add name=&quot;MySQL Data Provider&quot;<br />&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; invariant=&quot;MySql.Data.MySqlClient&quot;<br />&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; description=&quot;.Net Framework Data Provider for MySQL&quot;<br />&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; type=&quot;MySql.Data.MySqlClient.MySqlClientFactory, MySql.Data, Version=6.3.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d&quot; /&gt;<br />&#160;&#160;&#160; &lt;/DbProviderFactories&gt;<br />&#160; &lt;/system.data&gt;</p></blockquote>
+<p>Righto, now publish my changes and away we go….almost.</p>
+<p>This time I had something like the following error.</p>
+<blockquote><p>System.Security.SecurityException: Security error.</p>
+</blockquote>
+<p>The details mentioned that something was making a request to perform an action that wasn’t allowed under <strong>medium trust</strong>. A bit more googling and I found this <a href="http://support.winhost.com/KB/a657/changing-the-default-aspnet-trust-level.aspx" target="_blank">winhost kb article</a> on enabling full-trust. What nice people!</p>
+<p>After correcting a few problems with my web.release.config and relocating the MySql password I was up and running.</p>

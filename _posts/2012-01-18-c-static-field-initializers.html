@@ -1,0 +1,59 @@
+---
+layout: post
+title: C# Static Field Initializers
+categories:
+- C#
+- Programming
+tags:
+- C#
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I hit a problem recently where a singleton I was calling from an assembly resolver was throwing an exception. It turned out that the sync object used in the lock for the <a title="MSDN C# Singleton Pattern" href="http://msdn.microsoft.com/en-us/library/ff650316.aspx" target="_blank">singleton pattern</a> was null. How was this possible? Look at the code below:</p>
+<pre class="brush: csharp;">using System;
+
+public sealed class Singleton
+{
+   private static volatile Singleton instance;
+   private static readonly object syncRoot = new Object();
+
+   private Singleton() {}
+
+   public static Singleton Instance
+   {
+      get 
+      {
+         if (instance == null) 
+         {
+            lock (syncRoot) 
+            {
+               if (instance == null) 
+                  instance = new Singleton();
+            }
+         }
+
+         return instance;
+      }
+   }
+}</pre>
+<p>How can this be, my static readonly field should be set by the field initializer. This should be run before it’s first usage. Normally, this is true but for some reason this was not the case. The C#spec though gives us a workaround, implement a static constructor. The <a href="http://msdn.microsoft.com/en-us/library/aa645612(v=vs.71).aspx" target="_blank">section on static constructors</a> states: </p>
+<blockquote>
+<p>If a class contains any static fields with initializers, those initializers are executed in textual order immediately prior to executing the static constructor.</p>
+</blockquote>
+<p>Therefore, if we add a static constructor to our Singleton class, we get guaranteed initialization of the static field initializers before it is run, also:</p>
+<blockquote>
+<p>The static constructor for a class executes at most once in a given application domain. The execution of a static constructor is triggered by the first of the following events to occur within an application domain:</p>
+<ul>
+<li>An instance of the class is created. </li>
+<li>Any of the static members of the class are referenced. </li>
+</ul>
+</blockquote>
+<p>Therefore our static constructor will run before our singleton Instance property.</p>

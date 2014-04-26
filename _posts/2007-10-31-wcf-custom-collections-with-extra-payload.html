@@ -1,0 +1,31 @@
+---
+layout: post
+title: 'WCF: Custom Collections with Extra Payload'
+categories:
+- Main Page
+- WCF
+tags:
+- WCF
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I came across a pretty annoying problem to solve in WCF today. Suppose you have a custom collection of items you wish to use in a WCF contract but it also has extra properties that you have added, for example change tracking.</p></p>
+<div style="FONT-SIZE: 10pt; BACKGROUND: white; COLOR: black; FONT-FAMILY: Consolas">
+<p style="MARGIN: 0px">    [<span style="COLOR: #2b91af">Serializable</span>]</p>
+<p style="MARGIN: 0px">    <span style="COLOR: blue">public</span> <span style="COLOR: blue">class</span> <span style="COLOR: #2b91af">DtoCollection</span>&lt;T&gt; : <span style="COLOR: #2b91af">List</span>&lt;T&gt;</p>
+<p style="MARGIN: 0px">    {</p>
+<p style="MARGIN: 0px">        <span style="COLOR: blue">private</span> <span style="COLOR: #2b91af">List</span>&lt;T&gt; addedItems;</p>
+<p style="MARGIN: 0px">        <span style="COLOR: blue">private</span> <span style="COLOR: #2b91af">List</span>&lt;T&gt; removedItems;</p>
+<p style="MARGIN: 0px">    }</p>
+</div>
+<p> </p>
+<p>It will serialize the collection fine but your added properties and fields will not appear. The [CollectionDataContract] attribute will not help you. If you look at <a href="http://blogs.msdn.com/sowmy/archive/2006/02/22/536747.aspx" target="_blank&quot;">this really great post</a> from Sowmy Srinivasan's blog you can see the order of preference for WCF serialization markup. So in the case above you can implement IXmlSerializable to customize the serialization and deserialization of your custom collection. I originally found this solution on David Foderick's blog - OnMaterialize(), but the link seems to be down at the moment. I'll not repost the code here but google cache should still have it at <a href="http://72.14.253.104/search?q=cache:qTfNNcNbjI0J:netknowledgenow.com:81/CS/blogs/onmaterialize/archive/2007/01/18/Control-WCF-Serialization-of-Collections-with-IXmlSerializable.aspx+WCF+%22custom+collections%22&amp;hl=en&amp;ct=clnk&amp;cd=3" target="_blank&quot;">this link</a>.</p>

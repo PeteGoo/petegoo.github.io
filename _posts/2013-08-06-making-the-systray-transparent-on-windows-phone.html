@@ -1,0 +1,26 @@
+---
+layout: post
+title: Making the SysTray transparent on Windows Phone
+categories: []
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I’ve used a semi-transparent AppBar on windows phone a number of times to get the visual effect I wanted and to stop the dreaded jumping frame when transitioning pages but I didn’t think it would be possible with the SysTray. Turns out that the SysTray in Windows Phone can be made transparent.</p>
+<p>This is pretty useful if you want to keep an image background that spans the entire height of the screen. Simply add the attributes below to your root PhoneApplicationPage element.</p>
+<pre class="brush:xml">
+shell:SystemTray.IsVisible="True"
+shell:SystemTray.ForegroundColor="Yellow"
+shell:SystemTray.Opacity="0"
+</pre>
+<p>and the result should look like this:</p>
+<p><img class="alignnone size-medium wp-image-424" alt="systray" src="http://blog.petegoo.com/wp-content/uploads/2013/08/systray1-300x94.png" width="300" height="94" /></p>

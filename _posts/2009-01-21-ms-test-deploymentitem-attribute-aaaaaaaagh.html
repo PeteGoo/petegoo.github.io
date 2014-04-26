@@ -1,0 +1,37 @@
+---
+layout: post
+title: MS-Test DeploymentItem Attribute……..Aaaaaaaagh!
+categories: []
+tags:
+- MS Test
+- TDD
+- Unit Testing
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>We have a policy of using MS-Test, although that is overdue for a serious review.</p>
+<p>So it turns out you can use the deployment item attribute.... </p>
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">[</span><span style="font-size: 10pt; color: #2b91af; font-family: &quot;Courier New&quot;">TestMethod</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">] </span></p>
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">[</span><span style="font-size: 10pt; color: #2b91af; font-family: &quot;Courier New&quot;">DeploymentItem</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">(</span><span style="font-size: 10pt; color: #a31515; font-family: &quot;Courier New&quot;">"UnitTest.MyProject.TestData.xml"</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">)] </span></p>
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">public</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> </span><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">void</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> GetAllStatuses() {...} </span></p>
+<p />
+<p>....As long as you don’t provide a constant... </p>
+<p />
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">public</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> </span><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">const</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> </span><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">string</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> XMLCONFIGFILE = </span><span style="font-size: 10pt; color: #a31515; font-family: &quot;Courier New&quot;">"UnitTest.MyProject.TestData.xml"</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">; </span></p>
+<p />
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">[</span><span style="font-size: 10pt; color: #2b91af; font-family: &quot;Courier New&quot;">TestMethod</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">] </span></p>
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">[</span><span style="font-size: 10pt; color: #2b91af; font-family: &quot;Courier New&quot;">DeploymentItem</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">(</span><span style="font-size: 10pt; color: #2b91af; font-family: &quot;Courier New&quot;">TestHelper</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;">.XMLCONFIGFILE)] </span></p>
+<p style="background: white; margin: 0cm 0cm 0pt"><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">public</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> </span><span style="font-size: 10pt; color: blue; font-family: &quot;Courier New&quot;">void</span><span style="font-size: 10pt; color: black; font-family: &quot;Courier New&quot;"> GetAllStatuses() {...} </span></p>
+<p />
+<p>It just ignores it.....Genius! Now my tests have to be littered with this string literal. </p>
+<p>Makes you wonder how they are implementing this stuff. </p>
+<p class="MsoNormal">Pete </p>

@@ -1,0 +1,373 @@
+---
+layout: post
+title: Building an Auto Complete control with Reactive Extensions (Rx)
+categories:
+- C#
+- Programming
+- Rx
+- WPF
+tags:
+- C#
+- Rx
+- WPF
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I have been meaning to get into <a title="Ractive Extensions" href="http://msdn.microsoft.com/en-us/data/gg577609" target="_blank">Rx</a> for a while now and haven’t quite found the excuse or opportunity to do so. While playing with <a title="SignalR" href="https://github.com/SignalR/SignalR" target="_blank">SignalR</a> it became apparent that Rx was something that could help and while I was researching it I seen a lot of people talking about using Rx in UI frameworks and I thought, hmmm, that sounds interesting.</p>
+<p>So I set myself a challenge, I wanted to use Rx to create an auto-complete WPF control with some of the major use cases I have seen in these types of controls.</p>
+<h3>The App Shell</h3>
+<p>First thing I was going to need was a WPF application with a MainWindow that would hold my text box, the results and a log window.</p>
+<p>&#160;<a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture1.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[1]" border="0" alt="CropperCapture[1]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture1_thumb.jpg" width="478" height="320" /></a></p>
+<p>The XAML looks something like this:</p>
+<pre class="brush: xml;">&lt;Window
+    x:Class=&quot;AutoCompleteWithRx.MainWindow&quot;
+    xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+    xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+    Title=&quot;AutoComplete with Rx&quot;
+    Height=&quot;451&quot;
+    Width=&quot;825&quot;
+    xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+    xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+    xmlns:AutoCompleteWithRx=&quot;clr-namespace:AutoCompleteWithRx&quot;
+    mc:Ignorable=&quot;d&quot;
+    d:DataContext=&quot;{d:DesignInstance AutoCompleteWithRx:AutoCompleteViewModel}&quot;
+    FocusManager.FocusedElement=&quot;{Binding ElementName=SearchBox}&quot;&gt;
+    &lt;Grid&gt;
+        &lt;Grid.RowDefinitions&gt;
+            &lt;RowDefinition
+                Height=&quot;Auto&quot; /&gt;
+            &lt;RowDefinition /&gt;
+        &lt;/Grid.RowDefinitions&gt;
+        &lt;Grid.ColumnDefinitions&gt;
+            &lt;ColumnDefinition /&gt;
+            &lt;ColumnDefinition /&gt;
+        &lt;/Grid.ColumnDefinitions&gt;
+        &lt;TextBlock
+            FontFamily=&quot;Segoe WP Light&quot;
+            FontSize=&quot;26.667&quot;
+            Text=&quot;Auto-Complete Sample&quot;
+            Grid.ColumnSpan=&quot;2&quot; 
+            
+            /&gt;
+
+        &lt;StackPanel
+            Grid.Row=&quot;2&quot;&gt;
+            &lt;Label&gt;Search&lt;/Label&gt;
+            &lt;TextBox
+                x:Name=&quot;SearchBox&quot;
+                Text=&quot;{Binding SearchText, UpdateSourceTrigger=PropertyChanged}&quot;/&gt;
+            &lt;ProgressBar Height=&quot;19&quot; IsIndeterminate=&quot;True&quot;/&gt;
+            &lt;ListBox
+                ItemsSource=&quot;{Binding SearchResults}&quot; /&gt;
+        &lt;/StackPanel&gt;
+        &lt;StackPanel Grid.Column=&quot;1&quot; Orientation=&quot;Vertical&quot; Grid.Row=&quot;1&quot; d:LayoutOverrides=&quot;Height&quot;&gt;
+            &lt;Label&gt;Log&lt;/Label&gt;
+            &lt;ListBox
+                ItemsSource=&quot;{Binding LogOutput}&quot; /&gt;
+        &lt;/StackPanel&gt;
+    &lt;/Grid&gt;
+&lt;/Window&gt;</pre>
+<p>So that is basically the view for now. I have cheated and just instantiated my viewmodel in the code behind class for now.</p>
+<pre class="brush: csharp;">public partial class MainWindow : Window {
+    public MainWindow() {
+        InitializeComponent();
+        DataContext = new AutoCompleteViewModel();
+    }
+}</pre>
+<p>Now that we have a window I need to get my view model up to scratch. I started with simply satisfying the data properties required by my form.</p>
+<pre class="brush: csharp;">public class AutoCompleteViewModel : INotifyPropertyChanged {
+
+    private string searchText;
+
+    public string SearchText {
+        get { return searchText; }
+        set {
+            if (searchText == value) {
+                return;
+            }
+            searchText = value;
+            NotifyPropertyChanged(&quot;SearchText&quot;);
+        }
+    }
+
+    private readonly ObservableCollection&lt;string&gt; logOutput = new ObservableCollection&lt;string&gt;();
+
+    public ObservableCollection&lt;string&gt; LogOutput {
+        get { return logOutput; }
+    }
+
+    private readonly ObservableCollection&lt;string&gt; searchResults = new ObservableCollection&lt;string&gt;();
+
+    public ObservableCollection&lt;string&gt; SearchResults {
+        get { return searchResults; }
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected virtual void NotifyPropertyChanged(string propertyName) {
+        if (PropertyChanged != null) {
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}</pre>
+<h3>&#160;</h3>
+<h3>Subscribing to Property Changed Events using Rx</h3>
+<h3></h3>
+<p>OK. So that is simple enough but now I need to make my textbox do something when the user types into it. Before I start doing this though I will need to add Rx to my project. Right click the project choose “Manage <a title="Get NuGet if you don&#39;t have it" href="http://www.nuget.org" target="_blank">Nuget</a> Packages” and search for Rx, install Rx-Main and Rx-WPF.</p>
+<p>Let’s start by simply logging the fact that the user has typed something. Add a constructor to our view model class with the following code:</p>
+<pre class="brush: csharp;">public AutoCompleteViewModel() {
+    // Listen to all property change events on SearchText
+    var searchTextChanged = Observable.FromEventPattern&lt;PropertyChangedEventHandler, PropertyChangedEventArgs&gt;(
+        ev =&gt; PropertyChanged += ev,
+        ev =&gt; PropertyChanged -= ev
+        )
+        .Where(ev =&gt; ev.EventArgs.PropertyName == &quot;SearchText&quot;);
+
+    // Transform the event stream into a stream of strings (the input values)
+    var input = searchTextChanged
+        .Select(args =&gt; SearchText);
+
+    // Log all events in the event stream to the Log viewer
+    input.ObserveOn(DispatcherScheduler.Instance)
+        .Subscribe(e =&gt; LogOutput.Insert(0, 
+            string.Format(&quot;Text Changed. Current Value - {0}&quot;, e)));
+}</pre>
+<p>The first section of slightly unwieldy syntax creates an <a title="IObservable(Of T) on MSDN" href="http://msdn.microsoft.com/en-us/library/dd990377.aspx" target="_blank">IObservable</a> from the <a title="PropertyChanged" href="http://msdn.microsoft.com/en-us/library/system.componentmodel.inotifypropertychanged.propertychanged.aspx" target="_blank">PropertyChanged</a> event of <a title="INotifyPropertyChanged" href="http://msdn.microsoft.com/en-us/library/system.componentmodel.inotifypropertychanged.aspx" target="_blank">INotifyPropertyChanged</a> which our view model implements. You can think of the IObservable as a stream of events that will happen or a collection of future objects that will be added to each time the event is raised. Our code will then filter those events to only those concerning the SearchText that our textbox is bound to.</p>
+<p>The next line transforms the type of the events in our IObservable from <a title="PropertyChangeEventsArgs" href="http://msdn.microsoft.com/en-us/library/system.componentmodel.propertychangedeventargs.aspx" target="_blank">PropertyChangeEventsArgs</a> to string, the content of the textbox. Much more useful.</p>
+<p>Finally we need to subscribe to the event stream and do something with the string, firstly though we tell the subscription that we want to observe the events on the WPF dispatcher (This helper singleton comes from the Rx-WPF package). Then we simply provide an inline function to execute for each event, in our case inserting into the log stack which our LogOutput list box is bound to.</p>
+<p>The result looks like this.</p>
+<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture2.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[2]" border="0" alt="CropperCapture[2]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture2_thumb.jpg" width="521" height="286" /></a></p>
+<p>OK. So far so good. Now let’s add an actual search to the mix.</p>
+<h3>Chaining the Asynchronous Search</h3>
+<p>Before I add my search function I want to create a structure that will encapsulate the search term and it’s result.</p>
+<pre class="brush: csharp;">public struct SearchResult {
+    public string SearchTerm { get; set; }
+    public IEnumerable&lt;string&gt; Results { get; set; } 
+}</pre>
+<p>Next I add my search function. For now I’ve just created a synchronous function but chances are you would be calling an external service with <a title="Asynchronous Design Pattern Overview" href="http://msdn.microsoft.com/en-us/library/aa719595(v=vs.71).aspx" target="_blank">Async</a> methods (BeginXXX and EndXXX) for which you should use the <a href="http://rxwiki.wikidot.com/101samples#toc10" target="_blank">FromAsyncPattern</a> method instead of the <a title="Run a method asynchronously on demand" href="http://rxwiki.wikidot.com/101samples#toc2" target="_blank">ToAsync</a> I am using.</p>
+<pre class="brush: csharp;">private SearchResult DoSearch(string searchTerm) {
+    return new SearchResult {
+        SearchTerm = searchTerm,
+        Results =
+            phrases.Where(item =&gt; item.ToUpperInvariant().Contains(searchTerm.ToUpperInvariant())).ToArray()
+    };
+}
+
+private readonly string[] phrases = new[] {
+    &quot;The badger knows something&quot;,
+    &quot;Your head looks like a pineapple&quot;,
+    &quot;etc...&quot;,
+};</pre>
+<p>And now for the magic. To invoke our search we add the following to our constructor:</p>
+<pre class="brush: csharp;">// Setup an Observer for the search operation
+var search = Observable.ToAsync&lt;string, SearchResult&gt;(DoSearch);
+
+// Chain the input event stream and the search stream
+var results = from searchTerm in input
+              from result in search(searchTerm)
+              select result;
+
+// Log the search result and add the results to the results collection
+results.ObserveOn(DispatcherScheduler.Instance)
+.Subscribe(result =&gt; {
+    searchResults.Clear();
+    LogOutput.Insert(0, string.Format(&quot;Search for '{0}' returned '{1}' items&quot;, result.SearchTerm, result.Results.Count()));
+    result.Results.ToList().ForEach(item =&gt; searchResults.Add(item));
+    }
+);</pre>
+<p align="left">Here we firstly call <a title="Run a method asynchronously on demand" href="http://rxwiki.wikidot.com/101samples#toc2" target="_blank">ToAsync</a>, this will create a function that takes a string (our search term) and returns an Observable that will only ever produce one event (the Completed / End) and then close.</p>
+<p align="left">We chain the incoming input stream with the result of the search function using <a href="http://msdn.microsoft.com/en-us/library/bb308959.aspx#linqoverview_topic5" target="_blank">simplified LINQ syntax</a> and produce a new observable of SearchResult. We then observe the result, logging and updating the autocomplete items.</p>
+<p>The result is this:</p>
+<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture4.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[4]" border="0" alt="CropperCapture[4]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture4_thumb.jpg" width="477" height="302" /></a></p>
+<p>OK. So this is round about where my mind exploded and grey matter started to leak out of my ears. Basically what is happening is we are treating these incoming events as collections before they actually happen, then we can manipulate them using LINQ and even chain the events much like pipelining in UNIX / Powershell.</p>
+<p>We’re not done yet. We still have a number of issues.</p>
+<h3>Using Throttle to enforce an idle period before searching</h3>
+<p>One of the issues you can see in the above screenshot is that the search was done after every single key press. The owner of the service we are calling will not be too happy with us flooding them with unnecessary searches, so how do we stop this from happening. Typically we would create a timer that would wait for a period of inactivity before searching, we would have to reset the timer every time the user typed something so that the search is not performed for each of the previous characters and there would be quite a few lines of code required to actually do this.</p>
+<p>With Rx we can use the <a href="http://rxwiki.wikidot.com/101samples#toc29" target="_blank">Throttle</a> operator which will quite effectively do exactly the behaviour we want for free. We change our previous declaration of the input stream to add the Throttle method.</p>
+<pre class="brush: csharp;">var input = searchTextChanged
+    .Throttle(TimeSpan.FromMilliseconds(400))
+    .Select(args =&gt; SearchText);</pre>
+<p align="left">Now if we test we should get something like the following:</p>
+<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture5.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: block; float: none; border-top-width: 0px; border-bottom-width: 0px; margin-left: auto; border-left-width: 0px; margin-right: auto; padding-top: 0px" title="CropperCapture[5]" border="0" alt="CropperCapture[5]" src="http://blog.petegoo.com/wp-content/uploads/2011/11/CropperCapture5_thumb.jpg" width="428" height="182" /></a></p>
+<p>That was too easy.</p>
+<h3>Merging two event streams</h3>
+<p>The next requirement was that I may want a larger throttle timeout for strings of less than 3 characters as people tend to type slower at the start of a search. To do this I needed to split my input stream into two different event streams that could be throttled differently.</p>
+<pre class="brush: csharp;">var input = searchTextChanged
+    .Where(ev =&gt; SearchText == null || SearchText.Length &lt; 4)
+    .Throttle(TimeSpan.FromSeconds(3))
+    .Merge(searchTextChanged
+        .Where(ev =&gt; SearchText != null &amp;&amp; SearchText.Length &gt;= 4)
+        .Throttle(TimeSpan.FromMilliseconds(400)))
+    .Select(args =&gt; SearchText);</pre>
+<p>So above I have simply cut the searchTextChanged stream 2 different ways, throttled them differently and then I can use the <a title="Merge" href="http://rxwiki.wikidot.com/101samples#toc41" target="_blank">Merge</a> operator to join the streams back together again into one.</p>
+<h3></h3>
+<h3>Creating a Reactive ICommand for MVVM</h3>
+<p>The next requirement is that the search should be executed immediately if the user hits the <strong><em>enter</em></strong> key. To do this I decided to use the <a href="http://msdn.microsoft.com/en-us/magazine/dd419663.aspx" target="_blank">MVVM ICommand</a> pattern. We need to add the following Input <a title="KeyBinding on MSDN" href="http://msdn.microsoft.com/en-us/library/system.windows.input.keybinding.aspx" target="_blank">KeyBinding</a> to the TextBox in our XAML so that the enter key will be picked up and we point it at the command we will write below.</p>
+<pre class="brush: xml;">&lt;TextBox
+    x:Name=&quot;SearchBox&quot;
+    Text=&quot;{Binding SearchText, UpdateSourceTrigger=PropertyChanged}&quot;&gt;
+    &lt;TextBox.InputBindings&gt;
+        &lt;KeyBinding
+            Command=&quot;{Binding TextBoxEnterCommand}&quot;
+            Key=&quot;Enter&quot; /&gt;
+    &lt;/TextBox.InputBindings&gt;
+&lt;/TextBox&gt;</pre>
+<p>The next thing we need to do is create our own command type. If you use an MVVM framework that understands Rx like ReactiveUI then you should get this for free but implementing a simple version yourself is not difficult. We simply take the <a title="RelayCommand" href="http://msdn.microsoft.com/en-us/magazine/dd419663.aspx#id0090030" target="_blank">RelayCommand</a> defined by Josh Smith and add a <a title="Subject(Of T)" href="http://rxwiki.wikidot.com/101samples#toc48" target="_blank">Subject&lt;T&gt;</a> exposed as an Observable.</p>
+<pre class="brush: csharp;">public class ReactiveRelayCommand : ICommand {
+    private readonly Action&lt;object&gt; execute;
+    private readonly Predicate&lt;object&gt; canExecute;
+    
+    public ReactiveRelayCommand(Action&lt;object&gt; execute)
+        : this(execute, null) {
+    }
+
+    public ReactiveRelayCommand(Action&lt;object&gt; execute, Predicate&lt;object&gt; canExecute) {
+        if (execute == null)
+            throw new ArgumentNullException(&quot;execute&quot;);
+
+        this.execute = execute;
+        this.canExecute = canExecute;
+    }
+
+    [DebuggerStepThrough]
+    public bool CanExecute(object parameter) {
+        return canExecute == null || canExecute(parameter);
+    }
+
+    public event EventHandler CanExecuteChanged {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
+    }
+
+    public void Execute(object parameter) {
+        execute(parameter);
+        executed.OnNext(parameter);
+    }
+
+    private readonly Subject&lt;object&gt; executed = new Subject&lt;object&gt;();
+
+    public IObservable&lt;object&gt; Executed {
+        get { return executed; }
+    }
+}</pre>
+<p>Notice that it exactly the same as the standard RelayCommand except that we use a Subject&lt;object&gt; as the backing implementation for our IObservable. We call <a title="OnNext of IObserver" href="http://msdn.microsoft.com/en-us/library/dd782792.aspx" target="_blank">OnNext</a> whenever the command is Executed.</p>
+<p>Add the following field and property to the viewmodel class to store our command:</p>
+<pre class="brush: csharp;">private ReactiveRelayCommand textBoxEnterCommand;
+public ReactiveRelayCommand TextBoxEnterCommand {
+    get { return textBoxEnterCommand; }
+    set { textBoxEnterCommand = value; }
+}</pre>
+<p>Then at the start of our constructor we setup the command itself:</p>
+<pre class="brush: csharp;">// Setup the command for the enter key on the textbox
+textBoxEnterCommand = new ReactiveRelayCommand(obj =&gt; { });</pre>
+<p>Next we need to change our input event stream to take into account our command and merge that with our SearchText property change events so that either can fire our search:</p>
+<pre class="brush: csharp;">// Transform the event stream into a stream of strings (the input values)
+var input = searchTextChanged
+    .Where(ev =&gt; SearchText == null || SearchText.Length &lt; 4)
+    .Throttle(TimeSpan.FromSeconds(3))
+    .Merge(searchTextChanged
+        .Where(ev =&gt; SearchText != null &amp;&amp; SearchText.Length &gt;= 4)
+        .Throttle(TimeSpan.FromMilliseconds(400)))
+    .Select(args =&gt; SearchText)
+    .Merge(
+        textBoxEnterCommand.Executed.Select(e =&gt; SearchText));</pre>
+<p>Notice we have just added the last line to merge the Executed observable on our command. Now when we run we can type a single character and hit enter if we do not want to wait for the idle period. How easy was that? Are we done? Almost.</p>
+<h3></h3>
+<h3>Removing duplicate consecutive events</h3>
+<p>We still have an issue that when the user presses Enter, the idle timeout will expire some time later and we will get another event firing, essentially performing our search twice. So how do we stop the second duplicate event from being fired, easy, we just use <a title="DistinctUntilChanged" href="http://msdn.microsoft.com/en-us/library/system.reactive.linq.observable.distinctuntilchanged(v=vs.103).aspx" target="_blank">DistinctUntilChanged</a>. </p>
+<p>We want a distinct search but we still want to allow the same search to be done later if the user tries another search in between. In other words we can have the same search done twice as long as they aren’t consecutive searches.</p>
+<pre class="brush: csharp;">// Transform the event stream into a stream of strings (the input values)
+var input = searchTextChanged
+    .Where(ev =&gt; SearchText == null || SearchText.Length &lt; 4)
+    .Throttle(TimeSpan.FromSeconds(3))
+    .Merge(searchTextChanged
+        .Where(ev =&gt; SearchText != null &amp;&amp; SearchText.Length &gt;= 4)
+        .Throttle(TimeSpan.FromMilliseconds(400)))
+    .Select(args =&gt; SearchText)
+    .Merge(
+        textBoxEnterCommand.Executed.Select(e =&gt; SearchText))
+    .DistinctUntilChanged();</pre>
+<p>&#160;</p>
+<h3>Cancelling previous searches with TakeUntil</h3>
+<p>The last issue here is that when searches return out of sequence, we could get the wrong results displayed. For example, the user searches for <strong>cr</strong> hits enter but then types <strong>crazy</strong> and hits enter. If the first search is taking a long time because of the number of results then the results for it will end up being displayed after the actual current search term is displayed. To simulate this we could add some latency to our search.</p>
+<pre class="brush: csharp;">private readonly Random random = new Random(5);
+private SearchResult DoSearch(string searchTerm) {
+    Thread.Sleep(random.Next(100, 500)); // Simulate latency
+    return new SearchResult {
+        SearchTerm = searchTerm,
+        Results =
+            phrases.Where(item =&gt; item.ToUpperInvariant().Contains(searchTerm.ToUpperInvariant())).ToArray()
+    };
+}</pre>
+<p>To solve this we need to stop the Async stream when more input is given, this is pretty easy with the TakeUntil operator. Take operators define a completion for an event stream. In the case of an Async operation this will effectively cancel the Async subscription. TakeUntil takes an observable as input such that an event on that stream will complete the current stream. To implement this change we simply say the we TakeUntil the <strong><em>input</em></strong> stream in our chaining code.</p>
+<pre class="brush: csharp;">// Chain the input event stream and the search stream, cancelling searches when input is received
+var results = from searchTerm in input
+              from result in search(searchTerm).TakeUntil(input)
+              select result;</pre>
+<h3></h3>
+<h3>Summary</h3>
+<p>So we have managed to create the guts of an auto-complete control using Rx in a much more declarative way by responding to events in observables instead of writing lots of imperative code with little items of state sitting about to represent our state machine.</p>
+<p>All of the heavy work can be easily seen in a single declaration of intent:</p>
+<pre class="brush: csharp;">// Setup the command for the enter key on the textbox
+textBoxEnterCommand = new ReactiveRelayCommand(obj =&gt; { });
+
+// Listen to all property change events on SearchText
+var searchTextChanged = Observable.FromEventPattern&lt;PropertyChangedEventHandler, PropertyChangedEventArgs&gt;(
+    ev =&gt; PropertyChanged += ev,
+    ev =&gt; PropertyChanged -= ev
+    )
+    .Where(ev =&gt; ev.EventArgs.PropertyName == &quot;SearchText&quot;);
+
+// Transform the event stream into a stream of strings (the input values)
+var input = searchTextChanged
+    .Where(ev =&gt; SearchText == null || SearchText.Length &lt; 4)
+    .Throttle(TimeSpan.FromSeconds(3))
+    .Merge(searchTextChanged
+        .Where(ev =&gt; SearchText != null &amp;&amp; SearchText.Length &gt;= 4)
+        .Throttle(TimeSpan.FromMilliseconds(400)))
+    .Select(args =&gt; SearchText)
+    .Merge(
+        textBoxEnterCommand.Executed.Select(e =&gt; SearchText))
+    .DistinctUntilChanged();
+
+// Log all events in the event stream to the Log viewer
+input.ObserveOn(DispatcherScheduler.Instance)
+    .Subscribe(e =&gt; LogOutput.Insert(0, 
+        string.Format(&quot;Text Changed. Current Value - {0}&quot;, e)));
+
+// Setup an Observer for the search operation
+var search = Observable.ToAsync&lt;string, SearchResult&gt;(DoSearch);
+
+// Chain the input event stream and the search stream, cancelling searches when input is received
+var results = from searchTerm in input
+              from result in search(searchTerm).TakeUntil(input)
+              select result;
+
+// Log the search result and add the results to the results collection
+results.ObserveOn(DispatcherScheduler.Instance)
+.Subscribe(result =&gt; {
+    searchResults.Clear();
+    LogOutput.Insert(0, string.Format(&quot;Search for '{0}' returned '{1}' items&quot;, result.SearchTerm, result.Results.Count()));
+    result.Results.ToList().ForEach(item =&gt; searchResults.Add(item));
+    }
+);</pre>
+<p>&#160;</p>
+<p>Lots of the ideas and even the odd piece of code were taken from:</p>
+<ul>
+<li><a title="Bart De Smet - Blog" href="http://bartdesmet.net/blogs/bart/default.aspx" target="_blank">Bart De Smet</a> on <a title="DevCamp 2010 Keynote - Rx: Curing your asynchronous programming blues" href="http://channel9.msdn.com/Blogs/codefest/DC2010T0100-Keynote-Rx-curing-your-asynchronous-programming-blues" target="_blank">Curing Asynchronous Blues</a> </li>
+<li><a href="http://stackoverflow.com/questions/1763411/reactive-extensions-rx-mvvm" target="_blank">Stack Overflow</a>
+<p></p>
+<div class="xdownload">
+<div style="padding-bottom: 0px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; padding-top: 0px" id="scid:F60BB8FA-6F02-4999-8F5E-9DD4E92C4DA7:fc7f2917-f963-4fbb-b889-f5b061331d26" class="wlWriterEditableSmartContent">
+<div><a href="http://blog.petegoo.com/wp-content/uploads/2011/11/AutoCompleteBlog.zip" target="_self">AutoCompleteBlog.zip</a></div>
+</div></div>
+</li>
+</ul>

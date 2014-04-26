@@ -1,0 +1,30 @@
+---
+layout: post
+title: Response.Redirect and the ThreadAbortException
+categories:
+- ASP.Net
+- Main Page
+- Patterns &amp; Practices
+tags:
+- ASP.Net
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>A colleague came across a problem recently where performance counters were showing a high exception to request ratio. In actual fact there were at 4 exceptions for every 1 request, that's 400% compared to the desired 5%. These seemed to be getting handled at some stage or another as there were no HttpUnhandledExceptions getting thrown at the UI.</p>
+<p>It turns out that Response.Redirect and Server.Transfer will throw a ThreadAbortException everytime the single parameter overload is called.</p>
+<p>i.e. <font face="Courier New,Courier,mono">Response.Redirect( <font color="#000066">string </font>url )</font></p>
+<p>The problem is that Response.Redirect will call a Response.End internally to stop code executing after the statement. This in turn throws our mystery exceptions. To work around this use the overloaded version which allows code after the statement to be executed and try not to treat the statement as the end of a code block.</p>
+<p>i.e. pass "false" to second param of </p>
+<p><font face="Courier New,Courier,mono">Response.Redirect( <font color="#000066">string </font>url, <font color="#000066">bool </font>endResponse )</font></p>
+<p>There is a lot of fair argument to say that this shouldn't cause an exception. So if you see unexplained high exception counters, have a look at your Response.Redirects and Server.Transfers.</p>
+<p>MSDN Article: <a href="http://support.microsoft.com/kb/312629/EN-US/" target="_blank">PRB: ThreadAbortException Occurs If You Use Response.End, Response.Redirect, or Server.Transfer</a></p>
+<p>P.S. Thanks to Josh Twist at MS for pointing this one out. ;)</p>

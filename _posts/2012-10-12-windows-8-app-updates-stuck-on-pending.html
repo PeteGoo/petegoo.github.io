@@ -1,0 +1,24 @@
+---
+layout: post
+title: Windows 8 app updates stuck on Pending
+categories: []
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>I had an issue today where Windows 8 App updates were stuck on “Pending” status. This was for the Microsoft apps like Mail, Calendar, Messenger, Games, Maps etc. To workaround this problem use the following from a command prompt running as administrator.</p>
+<pre class="brush: ps;">net stop wuauserv
+rename c:\windows\SoftwareDistribution softwaredistribution.old
+net start wuauserv
+</pre>
+<p>&nbsp;</p>
+<p>Found at <a title="http://answers.microsoft.com/en-us/windows/forum/windows_8-winapps/maps-app-cannot-install-or-update-but-other-apps/01b3db2c-f805-444a-8bce-9f85733aa276" href="http://answers.microsoft.com/en-us/windows/forum/windows_8-winapps/maps-app-cannot-install-or-update-but-other-apps/01b3db2c-f805-444a-8bce-9f85733aa276">http://answers.microsoft.com/en-us/windows/forum/windows_8-winapps/maps-app-cannot-install-or-update-but-other-apps/01b3db2c-f805-444a-8bce-9f85733aa276</a></p>

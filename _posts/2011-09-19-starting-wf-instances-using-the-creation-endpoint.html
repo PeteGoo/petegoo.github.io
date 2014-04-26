@@ -1,0 +1,114 @@
+---
+layout: post
+title: Starting WF Instances using the Creation Endpoint
+categories:
+- C#
+- Enterprise Workflow
+- TechEd
+- tenz
+- WCF
+- WF4
+tags:
+- Enterprise Workflow
+- WCF
+- WF
+- WF4
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>This post is the third in a <a title="Building an Enterprise Workflow System using WF4" href="http://blog.petegoo.com/index.php/2011/09/02/building-an-enterprise-workflow-system-with-wf4/" target="_blank">series on building an Enterprise Workflow System using WF4</a>. <a href="http://blog.petegoo.com/index.php/2011/09/03/activities-vs-wf-services-in-search-of-the-ideal-authoring-experience/" target="_blank">Previously</a> we discussed how to get the activity authoring experience for workflow service authors by using a custom <a title="WorkflowServiceHostFactory on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activation.workflowservicehostfactory.aspx" target="_blank">WorkflowServiceHostFactory</a> to tell the <a title="WorkflowServiceHost on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.workflowservicehost.aspx" target="_blank">WorkflowServiceHost</a> to <a href="http://blog.petegoo.com/index.php/2011/09/07/hosting-an-activity-as-a-service-using-the-workflowservicehostfactory/" target="_blank">host a compiled activity</a> instead of a xamlx file.</p>
+<p>Now we have a problem in that our workflow service cannot be started because it does not have a Receive Activity with a “CanCreateInstance” flag. Well, this is where the <a title="WorkflowCreationEndpoint on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activities.workflowhostingendpoint.aspx" target="_blank">WorkflowCreationEndpoint</a> steps in. This little beauty is an endpoint that can sit on our workflow service and when a request is processed by this endpoint, it will start a new instance of our workflow.</p>
+<p>The only strange thing about this class is that it is a little different to implement than a standard WCF service. In WCF we would normally have an interface that represented our contract and we would only have to write a class that implements that contract. The WorkflowCreationEndpoint works slightly differently, before we get to that, lets create the interface that our clients will use to start a new instance of our workflow. Remember that we are building a Magic Eight Ball service such that we can ask a question, provide an email address and we will be emailed the response. Therefore our contract looks like this:</p>
+<p>&#160;</p>
+<pre class="brush: csharp;">[ServiceContract(Name = &quot;IEightBallContract&quot;)]
+public interface IEightBallContract {
+    [OperationContract]
+    Guid Ask(string question, string email);
+}</pre>
+<p>Notice that we have an operation called Ask that takes a question and an email address. The Guid return value will be our Workflow Instance Id.</p>
+<p>Now for the implementation of the WorkflowCreationEndpoint:</p>
+<pre class="brush: csharp;">internal class EnterpriseWorkflowCreationEndpoint : WorkflowHostingEndpoint  {
+    public EnterpriseWorkflowCreationEndpoint(Binding binding, EndpointAddress endpointAddress)
+        : base(typeof(IEightBallContract), binding, endpointAddress) {}
+
+    protected override WorkflowCreationContext OnGetCreationContext(object[] inputs, OperationContext operationContext, Guid instanceId, WorkflowHostingResponseContext responseContext) {
+
+        if(!operationContext.IncomingMessageHeaders.Action.EndsWith(&quot;Ask&quot;)) {
+            throw new InvalidOperationException();
+        }
+
+        EnterpriseWorkflowCreationContext workflowCreationContext = new EnterpriseWorkflowCreationContext();
+
+        string question = inputs[0] as string;
+        string email = inputs[1] as string;
+
+        workflowCreationContext.WorkflowArguments.Add(&quot;Question&quot;, question);
+        workflowCreationContext.Email = email;
+
+        responseContext.SendResponse(instanceId, null);
+
+        return workflowCreationContext;
+    }
+}</pre>
+<p>&#160;</p>
+<p>In the creation endpoint, we override the OnGetCreationContext method and first validate that we are dealing with the “Ask” operation that we expect. We will cover the WorkflowCreationContext in more detail in the next post but notice that we can take the inputs, in this case only the question, and pass them as arguments to our Workflow using the creation context. We then send a response to the user containing the instance id and we are done.</p>
+<p>The last step here is to wire up the creation endpoint on our WorkflowServiceHostFactory. For this we override the CreateWorkflowServiceHost method in the factory and add the endpoints as follows:</p>
+<pre class="brush: csharp;">protected override WorkflowServiceHost CreateWorkflowServiceHost(System.Activities.Activity activity, Uri[] baseAddresses) {
+    WorkflowServiceHost workflowServiceHost = base.CreateWorkflowServiceHost(activity, baseAddresses);
+    AddBehaviorsAndEndpoints(workflowServiceHost);
+    return workflowServiceHost;
+}
+
+/// &lt;summary&gt;
+/// Adds the standard behaviors and endpoints to our workflow service host.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;workflowServiceHost&quot;&gt;The workflow service host.&lt;/param&gt;
+private void AddBehaviorsAndEndpoints(WorkflowServiceHost workflowServiceHost) {
+    // Check whether we have already initialised the service host
+    if (workflowServiceHost.Description.Endpoints.Where(endpoint =&gt; endpoint is EnterpriseWorkflowCreationEndpoint).Any()) {
+        return;
+    }
+
+    // Add endpoints for any services that have been defined in the workflow
+    workflowServiceHost.AddDefaultEndpoints();
+
+    ServiceEndpoint firstEndpoint = (from endpoint in workflowServiceHost.Description.Endpoints
+                         where endpoint.IsSystemEndpoint == false
+                         select endpoint).FirstOrDefault();
+
+    BasicHttpBinding binding = new BasicHttpBinding();
+    EndpointAddress endpointAddress = new EndpointAddress(workflowServiceHost.BaseAddresses[0]);
+
+    // Add the creation endpoint
+    EnterpriseWorkflowCreationEndpoint creationEndpoint = new EnterpriseWorkflowCreationEndpoint(firstEndpoint != null ? firstEndpoint.Binding : binding, firstEndpoint != null ? firstEndpoint.Address : endpointAddress);
+
+    workflowServiceHost.AddServiceEndpoint(creationEndpoint);
+
+}</pre>
+<p>&#160;</p>
+<p>There is a lot more that can be done here but the important things to know are that we are using AddDefaultEndpoints to first add any endpoints that are specified by Receive activities on our workflow activity, this is important if we want to support a workflow that can be called from outside while in process. </p>
+<p>Next we create a default endpoint address and binding in case we are going to need it and then we try to reuse the address and binding of a previous endpoint if one exists otherwise use our new ones. Finally we simply call AddServiceEndpoint to add the WorkflowCreationEndpoint to our host. Now we have a workflow that can be started by calling Ask. You can test this using the WCF Test Client as below:</p>
+<p><a href="http://blog.petegoo.com/wp-content/uploads/2011/09/CropperCapture8.jpg"><img style="background-image: none; border-right-width: 0px; padding-left: 0px; padding-right: 0px; display: inline; border-top-width: 0px; border-bottom-width: 0px; border-left-width: 0px; padding-top: 0px" title="CropperCapture[8]" border="0" alt="CropperCapture[8]" src="http://blog.petegoo.com/wp-content/uploads/2011/09/CropperCapture8_thumb.jpg" width="504" height="281" /></a></p>
+<p>We can also write client code to access our service easily, either by using the Add Service Reference in Visual Studio or using the ChannelFactory.</p>
+<pre class="brush: csharp;">// Start the EightBall workflow
+IEightBallContract eightBall = ChannelFactory&lt;IEightBallContract&gt;.CreateChannel(
+    new BasicHttpBinding(),
+    new EndpointAddress(
+       &quot;http://localhost/HardcoreWorkflow/BasicMagicEightBall/EightBall.svc&quot;));
+
+eightBall.Ask(model.Question, model.Email);</pre>
+<p>&#160;</p>
+<p>In the <a title="Responding to Workflow completion with the WorkflowCreationContext" href="http://blog.petegoo.com/index.php/2011/09/23/responding-to-wf-completion-using-the-creation-context/" target="_blank">next post we will look at the WorkflowCreationContext</a> and how we can use it to store state about how our instance was started without requiring our workflow to know about it. We will also look at how we can respond to the completion of the workflow and perform an action once it is complete, cancelled or terminated.</p>
+<div class="xdownload">
+<div style="padding-bottom: 0px; border-right-width: 1px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; border-top-width: 1px; border-bottom-width: 1px; border-left-width: 1px; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:7112bb3d-3a91-4f1e-b688-368c61bf308d" class="wlWriterSmartContent">
+<p>Download the Code <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/EnterpriseWorkflowDemo1.zip" target="_blank">EnterpriseWorkflowDemo.zip</a></p>
+</p></div>
+</div>

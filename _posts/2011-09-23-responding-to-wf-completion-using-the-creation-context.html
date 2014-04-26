@@ -1,0 +1,105 @@
+---
+layout: post
+title: Responding to WF completion using the Creation Context
+categories:
+- C#
+- Presentations
+- TechEd
+- tenz
+- WCF
+- WF4
+tags:
+- Enterprise Workflow
+- WCF
+- WF
+- WF4
+status: publish
+type: post
+published: true
+meta: {}
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p>This is the fourth post in a series on <a href="http://blog.petegoo.com/index.php/2011/09/02/building-an-enterprise-workflow-system-with-wf4/" target="_blank">building an Enterprise Workflow system using WF4</a>. Previously we looked at the <a title="WorkflowServiceHostFactory on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activation.workflowservicehostfactory.aspx" target="_blank">WorkflowServiceHostFactory</a>,</a> the <a title="WorkflowCreationEndpoint on MSDN" href="http://msdn.microsoft.com/en-us/library/system.servicemodel.activities.workflowhostingendpoint.aspx" target="_blank">WorkflowCreationEndpoint</a> and how we can use these to host activities as our own services. In this post I want to explore how we can execute some action once the workflow has completed.</p>
+<p>Of course we could just put some activity at the end of our workflow but we are building an enterprise workflow system so we do not want to force our users to have to do this. Instead we want it to simply happen for them. Remember from the previous posts that we were creating a site that would allow users to create their own Magic Eight Ball implementations and upload them for an end user to consume, the end user could select an implementation, ask a question, supply an email address and get emailed a response.</p>
+<p>In this example we do not want the implementation writer to have to worry about sending the email so how can we get this to happen automatically. Well, enter the WorkflowCreationContext. The WorkflowCreationContext is basically a class that captures some information at workflow creation, we used it <a href="http://blog.petegoo.com/index.php/2011/09/19/starting-wf-instances-using-the-creation-endpoint/" target="_blank">previously</a> to add the arguments in our creation endpoint when starting our workflow.</p>
+<pre class="brush: csharp;">internal class EnterpriseWorkflowCreationEndpoint : WorkflowHostingEndpoint  {
+    public EnterpriseWorkflowCreationEndpoint(Binding binding, EndpointAddress endpointAddress)
+        : base(typeof(IEightBallContract), binding, endpointAddress) {}
+
+    protected override WorkflowCreationContext OnGetCreationContext(object[] inputs, OperationContext operationContext, Guid instanceId, WorkflowHostingResponseContext responseContext) {
+
+        if(!operationContext.IncomingMessageHeaders.Action.EndsWith(&quot;Ask&quot;)) {
+            throw new InvalidOperationException();
+        }
+
+        EnterpriseWorkflowCreationContext workflowCreationContext = new EnterpriseWorkflowCreationContext();
+
+        string question = inputs[0] as string;
+        string email = inputs[1] as string;
+
+        workflowCreationContext.WorkflowArguments.Add(&quot;Question&quot;, question);
+        workflowCreationContext.Email = email;
+
+        responseContext.SendResponse(instanceId, null);
+
+        return workflowCreationContext;
+    }
+}</pre>
+<p>&#160;</p>
+<p>Notice that we have used an<strong> EnterpriseWorkflowCreationContext</strong>, we could have just used the standard WorkflowCreationEndpoint but I wanted to do something special, I wanted to add behaviour to the completion of our workflow but there was one other thing. If the author of the workflow should not have to worry about the email then they should not be sent the email address supplied by the user, therefore I needed a way to store some data (the email address) along with the workflow but outside of the workflow’s activities.</p>
+<p>It just so happens that the WorkflowCreationContext gets serialized along with the instance so I am able to mark it up with DataContract and DataMember and add a property, this will survive till the end of the workflow and be available to my completion behaviour.</p>
+<pre class="brush: csharp;">[DataContract]
+public class EnterpriseWorkflowCreationContext : WorkflowCreationContext {
+    [DataMember]
+    public string Email { get; set; }
+
+    protected override System.IAsyncResult OnBeginWorkflowCompleted(System.Activities.ActivityInstanceState completionState, System.Collections.Generic.IDictionary&lt;string, object&gt; workflowOutputs, System.Exception terminationException, System.TimeSpan timeout, System.AsyncCallback callback, object state) {
+
+        if(terminationException == null) {
+            MailMessage mail = new MailMessage();
+            mail.To.Add(Email);
+
+            mail.From = new MailAddress(&quot;peter.goodman@aderant.com&quot;);
+
+            mail.Subject = &quot;The workflow has completed&quot;;
+
+            StringBuilder stringBuilder = new StringBuilder();
+            
+            stringBuilder.AppendLine(&quot;The result of the workflow was: &quot;);
+            
+            workflowOutputs.ToList().ForEach(kvp =&gt; 
+                stringBuilder.AppendLine(string.Format(&quot;{0}: {1}&quot;, kvp.Key, kvp.Value))
+            );
+            
+            mail.Body = stringBuilder.ToString();
+
+            mail.IsBodyHtml = false;
+
+            SmtpClient smtp = new SmtpClient();
+            smtp.Send(mail);
+            
+        }
+
+        return base.OnBeginWorkflowCompleted(completionState, workflowOutputs, terminationException, timeout, callback, state);
+    }
+    
+}</pre>
+<p>&#160;</p>
+<p>All I had to do was derive from WorkflowCreationContext and override the mind numbing OnBeginWorkflowCompleted method (basically when the workflow is starting to end). I use the previously saved Email address to construct an email and in this case I enumerate all the out arguments of the workflow into the body. The workflowOutputs will actually contain all the OutArgument and InOutArgument properties on your workflow definition keyed by their names.</p>
+<p>Of course this example is rather contrived but you could do more interesting things like respond to the workflow being terminated or cancelled by processing the exception, or as I have done before, implement a sub workflow activity.</p>
+<h3>Sub Workflow</h3>
+<p>It’s probably worth a quick overview of how you could implement a sub workflow using the WorkflowCreationContext. Basically you have an activity that knows how to call another workflow’s creation endpoint, passing the id of the source workflow and a correlation token as arguments. Immediately following that creation call, the calling activity sets up a Receive activity waiting on a response. </p>
+<p>Meanwhile the target workflow runs to completion and in the OnBeginWorkflowCompleted event realises that it has a source workflow id and correlation token to callback a source workflow to notify it that the target workflow has completed. It does so thus resuming the source workflow as if it had just called another activity instead of a whole other workflow.</p>
+<p>The only complexity is in mapping the arguments and providing a generic way of doing so. I tend to use IDictionary&lt;string, object&gt; for this kind of stuff.</p>
+<p>Why is this useful? Well, it allows for finer grained versioning of aspects of large processes. The more state you have in a long running workflow the more likely you will have problems versioning any aspect of it. If you split these large processes up into smaller ones, you can easily upgrade a sub-process and have it affect larger workflows. More on that in a later post.</p>
+<p>So that was the use of the WorkflowCreationContext. In the source I have supplied I have also created a Manual Task Activity based on my <a title="Human Based Workflows" href="http://blog.petegoo.com/index.php/2010/08/22/workflow-4-email-approval-sample/" target="_blank">earlier posting about manual tasks in workflow</a>. </p>
+<div class="xdownload">
+<div style="padding-bottom: 0px; border-right-width: 1px; margin: 0px; padding-left: 0px; padding-right: 0px; display: inline; float: none; border-top-width: 1px; border-bottom-width: 1px; border-left-width: 1px; padding-top: 0px" id="scid:fb3a1972-4489-4e52-abe7-25a00bb07fdf:7112bb3d-3a91-4f1e-b688-368c61bf308d" class="wlWriterEditableSmartContent">
+<p>Download the Code <a href="http://blog.petegoo.com/wp-content/uploads/2011/09/EnterpriseWorkflowDemo1.zip" target="_blank">EnterpriseWorkflowDemo.zip</a></p>
+</div>
+</div>

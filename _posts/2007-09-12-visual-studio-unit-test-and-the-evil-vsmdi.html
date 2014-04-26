@@ -1,0 +1,25 @@
+---
+layout: post
+title: Visual Studio Unit Test and the evil vsmdi
+categories:
+- Main Page
+- Visual Studio
+tags:
+- TDD
+- Unit Testing
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: admin
+  email: pete@petegoo.com
+  display_name: PeteGoo
+  first_name: Peter
+  last_name: Goodman
+---
+<p align="left"><span>During a recent project we found a recurring problem where the test view of the unit (&amp; integration) test projects would not load and we could not run tests. This was typically seen by the Test View load progress bar sitting at around 99%. This just adds to the list of "features" of VSTS Unit Test that make life oh so irritating</p>
+<p>It is due to the corruption of the *.vsmdi files in the visual studio solution which is caused by auto-merging the content of the file or having the test view property window open when getting the latest version.</p>
+<p> The problem is outlined in this blog post (also note the comments for possible workarounds)</p>
+<p>Source: <a href="http://kjellsj.blogspot.com/2006/04/vsmdi-file-weak-spot-of-vsts-test.html" target="_blank">http://kjellsj.blogspot.com/2006/04/vsmdi-file-weak-spot-of-vsts-test.html</a><br /></span></p>
