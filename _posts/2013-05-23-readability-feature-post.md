@@ -6,8 +6,6 @@ tags: [sample post, readability, test]
 comments: true
 image:
   feature: texture-feature-04.jpg
-  credit: Texture Lovers
-  creditlink: http://texturelovers.com
 published: false
 ---
 
