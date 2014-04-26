@@ -2,6 +2,7 @@ title:            PeteGoo
 description:      .Net Heebie Jeebies.
 # Your site's domain goes here. Leave localhost server or blank when working locally.
 url:              http://petegoo.github.io
+# url:              http://localhost:4000
 disqus_shortname: petegoo
 
 # Owner/author information
@@ -53,7 +54,7 @@ markdown:    kramdown
 encoding:    utf-8
 
 # https://github.com/mojombo/jekyll/wiki/Permalinks
-permalink:   /:categories/:title/
+permalink:    /:year/:month/:day/:title/
 
 kramdown:
   auto_ids: true
@@ -71,3 +72,8 @@ kramdown:
 
 include: [".htaccess"]
 exclude: ["lib", "config.rb", "Capfile", "config", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules"]
+
+gems:
+- jekyll-mentions
+- jemoji
+- jekyll-redirect-from
