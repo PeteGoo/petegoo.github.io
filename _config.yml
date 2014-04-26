@@ -28,10 +28,10 @@ owner:
   google_plus:    PeterGoodmanPeteGoo/
 
 # Analytics and webmaster tools stuff goes here
-google_analytics:   
-google_verify:      
+google_analytics:   UA-50413255-1
+google_verify:      E6d6cvSKm-tE4sFHyPeEwccGCm-om-6eMLpnsIB8NDs
 # https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
-bing_verify:        
+bing_verify:        E057F0AEC7C9AFC691D6B33475024AD4
 
 # Links to include in top navigation
 # For external links add external: true
