@@ -17,6 +17,8 @@ author:
   first_name: Peter
   last_name: Goodman
 ---
+![GitHub Pages](/images/github.pages.jpg)
+
 Like most of the bloggers on the internet these days I've moved my blog off wordpress and onto GitHub pages using Jekyll. 
 
 There was a fairly large amount of [Yak Shaving](http://www.hanselman.com/blog/YakShavingDefinedIllGetThatDoneAsSoonAsIShaveThisYak.aspx) involved in this process. I'm not going to do a tutorial on how to move from Wordpress to Pages/Jekyll, you can find plenty of info on how to do that on the links below. I will however point out some of the things that threw me.
