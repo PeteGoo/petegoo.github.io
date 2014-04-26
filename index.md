@@ -6,4 +6,5 @@ image:
   feature: texture-feature-01.jpg
 redirect_from:
   - /blog/
+  - /Default.aspx/
 ---
