@@ -1,7 +1,7 @@
 ---
 layout: home
-description: "A responsive Jekyll theme with editorial tendencies by designer Michael Rose."
-tags: [Jekyll, theme, responsive, blog, template]
+description: "Blog about code, frameworks, patterns, being a developer and general stuff. Possibly .net biased."
+tags: [code, petegoo, .net, c#, auckland]
 image:
   feature: texture-feature-01.jpg
 redirect_from:
