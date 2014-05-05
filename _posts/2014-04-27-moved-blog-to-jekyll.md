@@ -36,5 +36,6 @@ There was a fairly large amount of [Yak Shaving](http://www.hanselman.com/blog/Y
 * DO NOT waste time trying to get [FrontMatter defaults](http://jekyllrb.com/docs/configuration/) working. I couldn't and gave up. Wasted sooooo much time on this. Instead I just changed the template to always switch on Disqus comments on posts.
 * Disqus support admitted that they currently have a problem with their import, hence my old comments are not there yet.
 * Learn to get permalinks right and use the [jekyll-redirect-from plugin](https://github.com/jekyll/jekyll-redirect-from) which GitHub pages supports.
+* Worst of all is the rss feed. My previous blog's feed was at `/index.php/feed/` while the default templates for jekyll puts it at `/feed.xml`. This wouldn't be too hard but the redirect plugin for jekyll uses html based redirects rather than proper 301s, Feedly only likes 301s. Add to that the fact that GitHub pages doesn't do `.htaccess` files and you have a recipe for disaster. Luckily there is a hack, create an _index.php_ folder and a _feed_ folder and inside put a copy of the _feed.xml_ file renamed to _index.html_. Although the content-type of the feed response is now _text/html_ it seems to work none-the-less.
 
 Good Luck!
