@@ -23,7 +23,7 @@ Recently I faced an issue trying to get my head around a large codebase consisti
 
 Luckily I knew that Visual Studio supports the [DGML file format](http://en.wikipedia.org/wiki/DGML) in all editions. DGML is essentially a file format where you specify a number of nodes and then links between them as below.
 
-```xml
+~~~ xml
 <?xml version='1.0' encoding='utf-8'?>
 <DirectedGraph xmlns="http://schemas.microsoft.com/vs/2009/dgml">
   <Nodes>
@@ -36,7 +36,7 @@ Luckily I knew that Visual Studio supports the [DGML file format](http://en.wiki
     <Link Source="1" Target="1" />
   </Links>
 </DirectedGraph>
-```
+~~~
 
 Open this file in Visual Studio and you get a nice designer view where you can arrange and change things as you require.
 
