@@ -18,6 +18,7 @@ author:
   first_name: Peter
   last_name: Goodman
 ---
+
 Recently I faced an issue trying to get my head around a large codebase consisting of multiple solutions and many many projects. The difficulty was in trying to understand the interdependencies between these projects, espectially the ones that are in different solutions. There are tools to do this. NDepend has some neat stuff, Visual Studio Ultimate Edition can do some things and there are others. For my simple scenario though I couldn't justify the licensing cost.
 
 Luckily I knew that Visual Studio supports the [DGML file format](http://en.wikipedia.org/wiki/DGML) in all editions. DGML is essentially a file format where you specify a number of nodes and then links between them as below.
@@ -35,7 +36,6 @@ Luckily I knew that Visual Studio supports the [DGML file format](http://en.wiki
     <Link Source="1" Target="1" />
   </Links>
 </DirectedGraph>
-
 ```
 
 Open this file in Visual Studio and you get a nice designer view where you can arrange and change things as you require.
