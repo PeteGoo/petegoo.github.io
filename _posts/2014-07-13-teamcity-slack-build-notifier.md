@@ -20,7 +20,7 @@ author:
   last_name: Goodman
 ---
 
-We have become huge fans of [Slack](http://slack.com) in our office, as have lot of people I know in the software development industry. If you haven't heard of Slack, well it's basically a chat system for businesses, much like HipChat or Campfire. The difference being that Slack seems to bring a healthy dose of cool to everything they do, they are iterating incredibly fast right now and seem to be hitting all the right notes.
+We have become immense fans of [Slack](http://slack.com) in our office, as have lot of people I know in the software development industry. If you haven't heard of Slack, well it's basically a chat system for businesses, much like HipChat or Campfire. The difference being that Slack seems to bring a healthy dose of cool to everything they do, they are iterating incredibly fast right now and seem to be hitting all the right notes.
 
 Ok, so once you have Slack up and running, you turn to integrations with other systems that are going to maximise on the true [ChatOps](https://www.youtube.com/watch?v=NST3u-GjjFw) experience. There are already integrations with JIRA, New Relic, GitHub, Twitter and just about every other thing you can think of. 
 
