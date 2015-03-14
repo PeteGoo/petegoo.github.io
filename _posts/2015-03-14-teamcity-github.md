@@ -82,9 +82,9 @@ Note that if you setup a VCS Trigger to initiate your builds when someone has pu
 
 ## Triggering new builds when someone pushed code
 
-By default TeamCity can be configured with a VCS trigger that polls the git repository looking for changes. If your TeamCity server can be reached on the open internet then you can ask GitHub.com to tell TeamCity that changes have been made the instant someone pushed coded to GitHub.
+By default TeamCity can be configured with a VCS trigger that polls the git repository looking for changes. The only thing is that of course, after you push your code, you will have to wait until the poll interval triggers again. 
 
-To do this you need to go to the Settings of your repository then add the TeamCity service from the WebHooks and Services panel. It may require a username and password unless you have guest access enabled.
+If your TeamCity server can be reached on the open internet then you can ask GitHub.com to tell TeamCity that changes have been made the instant someone pushed coded to GitHub. To do this you need to go to the Settings of your repository then add the TeamCity service from the WebHooks and Services panel. It may require a username and password unless you have guest access enabled.
 
 # Using a Mac OS TeamCity agent with a Windows TeamCity Server
 
