@@ -78,6 +78,9 @@ The parenthesis `()` allow you to specify the part of the branch syntax that wil
 
 [Building the merge result of pull requests](http://blog.jetbrains.com/teamcity/2013/02/automatically-building-pull-requests-from-github-with-teamcity/) with `refs/pull/(*)/merge` is a pretty cool idea. Basically it means that when GitHub knows that the potential merge result of a pull request would change then a build will trigger that not only looks at the PR but attempts to merge it into the parent branch as if someone had pressed the green `merge` button in GitHub, before building the code. This seems cool but there are number of problems mostly in that the builds will be triggered ALL THE TIME and your build queue gets swamped with all your PRs building. For example when someone looks at the PR on github.com [it will trigger a new build](https://twitter.com/bradwilson/status/574702084370509824) if it detects that something could change in the merge result, we found that as people were skimming over PRs on github.com our TeamCity server got completed swamped. Therefore, we don't use this feature, instead we just don't keep long running feature branches.
 
+<blockquote class="twitter-tweet" lang="en"><p>I like that I can get <a href="https://twitter.com/teamcity">@teamcity</a> to auto-build PRs from <a href="https://twitter.com/github">@github</a>. I really hate that looking at a PR on <a href="https://twitter.com/github">@github</a> causes another build.</p>&mdash; Brad Wilson (@bradwilson) <a href="https://twitter.com/bradwilson/status/574702084370509824">March 8, 2015</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 Note that if you setup a VCS Trigger to initiate your builds when someone has pushed code to GitHub then you can also also specify the same branch syntax in the trigger branch filter field.
 
 ## Triggering new builds when someone pushed code
