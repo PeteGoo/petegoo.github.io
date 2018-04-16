@@ -12,7 +12,7 @@ tags:
 - pipelines
 status: publish
 type: post
-published: false
+published: true
 meta: {}
 author:
   login: petegoo
@@ -33,8 +33,6 @@ You then need to `prune-worker` if you want your builds to keep working.
 This post aims to give you the basics for getting lifecycle management a bit better so you can
 simply roll the instances in your worker pool Auto-Scaling Group (ASG) when you want to get some 
 fresh ones without incurring the annoyance of having to clear out those stalled workers.
-
-[All code available here](https://github.com/PeteGoo/packer-win-aws)
 
 ## Lifecycle Hook
 
