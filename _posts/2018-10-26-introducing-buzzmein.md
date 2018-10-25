@@ -29,7 +29,7 @@ etc.
 Eventually you start to add your user's home IP addresses to the security group but now they're on 
 the road and need access from a hotel or cafe. What now?
 
-![/buzzmein](/images/2018/buzzmein_128x128.png)
+![/buzzmein](/images/2018/bee_logo_128x128.png)
 
 BuzzMeIn creates short-lived temporary security group leases by adding your users IP address when
 they request it via Slack. You can whitelist users or a channel, handy if you just wnat to invite people 
