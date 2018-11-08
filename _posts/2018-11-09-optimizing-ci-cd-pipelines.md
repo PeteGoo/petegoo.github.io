@@ -94,7 +94,7 @@ The next step is to add timings to the steps involved. I find it easiest to star
 
 Look at your builds and test runs and take a sample of timings for each type. Figure out what the median is and write it next to that build step or test run box in your pipeline drawing.
 
-At this point you have some timings and there are things we can infer and optimize which you will see later but resist the urge to concentrate on the automation. Often the biggest problems and most effective changes and can be found elsewhere.
+At this point you have some timings and there are things we can infer and optimize which you will see later but resist the urge to concentrate on the automation. Often the biggest problems and most effective changes can be found elsewhere.
 
 Note the deployment step times, for each environment. Some environments for us take longer because they have more machines.
 
@@ -117,6 +117,7 @@ Some common examples are:
 - Re-work in the pipeline
   - Compile errors
   - Test failures
+  - Reverts
 - People orchestration
   - Key people were in meetings, out to lunch
   - I didn't notice that I was up / required to do something
@@ -152,4 +153,4 @@ For example, we use a build bot modelled on [the Etsy train](http://pushtrain.cl
 
 ## Conclusion
 
-Hopefully this framework can help you optimize your own CI/CD pipelines. It has certainly helped me over the years reason about where to spend time and why.
+Hopefully this framework can help you optimize your own CI/CD pipelines. It has certainly helped me over the years when reasoning about where to spend time and why.
