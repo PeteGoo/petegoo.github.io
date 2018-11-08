@@ -3,7 +3,7 @@ description:      .Net Heebie Jeebies.
 # Your site's domain goes here. Leave localhost server or blank when working locally.
 # url:              http://petegoo.github.io
 # url:              http://localhost:4000
-url:              http://blog.petegoo.com
+url:              https://blog.petegoo.com
 disqus_shortname: petegoo
 
 # Owner/author information

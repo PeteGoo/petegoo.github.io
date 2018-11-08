@@ -35,7 +35,7 @@ author:
 <p>The client script needed to get the value from the control is as follows</p>
 <div class="codeBlock"><span style="FONT-SIZE: 8pt"><span style="FONT-FAMILY: Courier New"><span style="COLOR: #0000ff">function</span> displayClientDate()<br />{<br />    alert( $find( <span style="COLOR: #a31515">"dtpMyDate"</span> ).get_selectedDateTime().format(<span style="COLOR: #a31515">"dddd dd MMMM yyyy HH:mm"</span>) );<br />}</span></span></div>
 <p>....and that's it! The screenshot below shows the output.</p>
-<p><img style="MARGIN: 5px" alt="" src="http://blog.peter.goodman.ms/blogImages/AJAXDateTimePicker/ClientScreenshot.gif" /></p>
+<p><img style="MARGIN: 5px" alt="" src="https://blog.peter.goodman.ms/blogImages/AJAXDateTimePicker/ClientScreenshot.gif" /></p>
 <p><span style="FONT-SIZE: 14pt">The Implementation</span></p>
 <p>To implement the custom control described above we have to implement the <strong>IScriptControl</strong> interface from the AJAX Extensions as well as the standard <strong>CompositeControl</strong>. This requires that we implement a few methods on our control above and beyond the standard control methods, these are the <strong>GetScriptReferences</strong> and the <strong>GetScriptDescriptors</strong> methods.</p>
 <p>GetScriptReferences allows us to add in the client script files to the output sent to the user. This tells the ScriptManager on the page to send down our client script file.</p>
@@ -162,4 +162,4 @@ author:
 <p><span style="FONT-SIZE: 14pt">How Does it Work?</span></p>
 <p>The libraries provided with the ASP.Net AJAX Extensions allow us to create composite controls which we can deal with as a single object on the client using object-oriented javascript. Using the patterns and examples given on the <a href="http://ajax.asp.net/" target="_blank">AJAX web site</a> we can recreate the types of functionality in the AjaxControlToolkit and start building rich client side experiences.</p>
 <p>In this example we have simply provided a public method on our object which grabs the values from the controls on the page and uses the type extensions in AJAX to provide a similar experience in client side development as we experience on the server side. To extend this example I have created a RequiredFieldValidator and a CompareValidator which will work with the above control and I hope to post this when it has been cleaned up.</p>
-<p>The full code and solution for this example is <a href="http://blog.peter.goodman.ms/CodeSamples/AJAXDateTimePicker.zip">available here</a></p>
+<p>The full code and solution for this example is <a href="https://blog.peter.goodman.ms/CodeSamples/AJAXDateTimePicker.zip">available here</a></p>
