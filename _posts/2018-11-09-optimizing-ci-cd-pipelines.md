@@ -86,6 +86,8 @@ For me I choose to draw the stages as a vertical pipeline then switched to horiz
 
 Your process should end with the point at which you are happy with the release in production.
 
+![pipeline1](/images/2018/pipeline1.png)
+
 ## Measure the Builds, Steps and Stages
 
 The next step is to add timings to the steps involved. I find it easiest to start with the builds.
