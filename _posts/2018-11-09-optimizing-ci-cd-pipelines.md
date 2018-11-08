@@ -12,7 +12,7 @@ tags:
 - continuous-integration
 status: publish
 type: post
-published: false
+published: true
 meta: {}
 author:
   login: petegoo
@@ -38,7 +38,7 @@ and where they are.
 - Help your engineers solve their own problems earlier, before they become everyone else's problem
 
 ## Why measure
-We all know that smaller releases, more often helps us deliver value to our customers, with less risk and this gives us a competitive advantage. Therefore we all want more throughput in our pipelines. If you have a anything more complicated than a very simple one build, one test suite, one deploy pipeline then this can be a difficult thing to achieve.
+We all know that smaller releases, more often helps us deliver value to our customers, with less risk and this gives us a competitive advantage. Therefore we all want more throughput in our pipelines. If you have anything more complicated than a very simple one build, one test suite, one deploy pipeline then this can be a difficult thing to achieve.
 
 We use a train metaphor for the pipelines involved in the shipping of our releases. Sure you can build more trains but that comes with complexity (to really drag the metaphor out, junctions and stations). A faster train is always going to bring benefits to your continuous delivery pipeline. Build faster trains.
 
@@ -60,7 +60,7 @@ or even better
 
 Yeah, this isn't really about tools, it can be but it doesn't have to be.
 
-I'm a real believer in the power of diagramming, I'm not talking about UML here. In fact I'm specifically talking about NOT UML. Boxes, lines and words are what you need. Patterns & Practices, acronyms and specific terminology can be incredibly devisive. Diagrams are a room leveller, they bring everybody into the same conversationm, losing the least amount of participants along the way.
+I'm a real believer in the power of diagramming, I'm not talking about UML here. In fact I'm specifically talking about NOT UML. Boxes, lines and words are what you need. Patterns & Practices, acronyms and specific terminology can be incredibly devisive. Diagrams are a room leveller, they bring everybody into the same conversation, losing the least amount of participants along the way.
 
 ## Getting Started
 
@@ -111,6 +111,7 @@ Decide what your end-to-end pipeline measure is and take note of the time it tak
 Now that you have a timing for how long this normally takes, as an engineering team, start recording why it sometimes takes longer. 
 
 Some common examples are:
+
 - Complex manual testing
   - The changes touched a lot of things so it needed more manual testing
 - Re-work in the pipeline
@@ -124,7 +125,7 @@ Some common examples are:
 
 ## Parallelize
 
-Look at your build steps and test suites with their timings. You can now see some optimizations were parallelism can be a deciding factor in what you do next.
+Look at your build steps and test suites with their timings. You can now see some optimizations where parallelism can be a deciding factor in what you do next.
 
 ### Can you run some things in parallel?
 Some steps can be easily parallelized. If you have 5 consecutive test runs, can you do them in parallel? Your CI tool can most likely orchestrate this for you.
@@ -140,14 +141,14 @@ Look at the timings. If Test Suite A takes 5 mins and Test Suite B runs in paral
 
 ## Look for Human Wait Times
 
-Sure, sometimes we are waiting on the computers to do build things or test things. Often, however it is the co-ordination of the meat-bags (humans) that is the problem. 
+Sure, sometimes we are waiting on the computers to do build things or test things. Often, however, it is the co-ordination of the meat-bags (humans) that is the problem. 
 
 For example, we use a build bot modelled on [the Etsy train](http://pushtrain.club/) but implemented in Slack. We call it `C3-PR` (PR for Pull Requsts). One thing we found is that if we mention the people in the carriage we have a better chance of having them perform the tasks we need them to like Merge, Deploy etc. If you have no human involvement in your pipeline then I commend you, but most folks I talk to have some human involvement at least in failure scenarios. These human factors therefore can be very important in realising maximum throughput in your pipeline.
 
 ## Be Kind To Your People
 
 - Can your build tool notify people earlier that a test has failed and continue on with the rest or does it have to wait until the end of the test suite?
-- Could an Engineer have found the source of re-work (buid / test failure) earlier on their machine or the Pull Request before it was merged into master? In other words **Help your engineers solve their own problems earlier, before they become everyone else's problem**
+- Could an Engineer have found the source of re-work (build / test failure) earlier on their machine or the Pull Request before it was merged into master? In other words **Help your engineers solve their own problems earlier, before they become everyone else's problem**
 
 ## Conclusion
 
