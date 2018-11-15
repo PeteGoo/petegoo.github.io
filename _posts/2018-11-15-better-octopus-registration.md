@@ -16,7 +16,7 @@ tags:
 - ec2
 status: publish
 type: post
-published: false
+published: true
 meta: {}
 author:
   login: petegoo
@@ -51,5 +51,5 @@ This SNS message triggers a Lambda which uses the EC2 APIs to query the metadata
 
 Basically validate your client inputs. They can lie like terrible lying things. 
 
-Lambda is great piece of glue you can use to solve these types of problems. Now you can even write them in Powershell should you so desired. Personally I write most of mine in Python but you can choose your poison without needing to change this pattern.
+Lambda is great piece of glue you can use to solve these types of problems. Now you can even write them in Powershell should you so desire. Personally I write most of mine in Python but you can choose your poison without needing to change this pattern.
 
