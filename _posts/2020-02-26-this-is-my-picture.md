@@ -104,7 +104,7 @@ In our office Friday at 3pm is "This is my picture" time.
  - List the ideas on the board
  - Now ask for a show of hands on each item in turn
  - Mark the votes beside each item
- - Start with the highest voted item and as for volunteers to draw it
+ - Start with the highest voted item and ask for volunteers to draw it
  - If nobody is willing to draw it or it doesn't get enough votes then it can carry over
  - Almost always it spills over in discussion to drinks and pizza
  - Live slack the list of ideas so that stragglers can opt in
