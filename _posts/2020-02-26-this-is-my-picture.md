@@ -23,7 +23,7 @@ author:
 
 ---
 
-How inclusive is the culture of architecture and design within your teams? Can everyone in your organisation easily contribute ideas and share their experience?
+How inclusive is the culture of architecture and design within your teams? Is the way you communicate these designs and intent accessible by everyone? Can everyone in your organisation easily contribute ideas and share their experience?
 
 For the last few years I've been trying to actively spend more time drawing code, architectures and concepts rather than just talking about them. I feel like this was once a lot more common in the places I have worked but seems to have become something of a rarity.
 
@@ -43,7 +43,7 @@ The simple answer is that he drew on a whiteboard with a marker as he talked. Th
 
 ## So why are pictures important
 
-Drawing pictures in front of people is a *room leveller*.
+**Drawing pictures in front of people is a *room leveller*.**
 
 We have so much assumed context when we present to or talk with our peers that we often forget that we may have completely different backgrounds and experiences. For example:
 
@@ -62,7 +62,7 @@ I've often had the experience where I've tried to recreate a successful whiteboa
 
 Watching a drawing unfold in front of you as the intent is explained builds understanding as the picture evolves. While the conversation continues the breadcrumbs of how that understanding was formed are still there in full view, reinforcing the conceptual model we have built as it is committed to memory. At the same time it allows the presenter to add a layer of language and terminology on top of that new understanding. 
 
-That newly accumulated understanding, language and terminology will always be rooted in the memory of the drawing which is relevant and helpful. Without these visual memories I tend to associate what I learned with the shoes of the presenter, the smell of the room or the colour of the walls. 
+That newly accumulated understanding, language and terminology will always be rooted in the memory of the drawing. A drawing that is relevant and helpful. Without these visual memories I tend to associate what I learned with the shoes of the presenter, the smell of the room or the colour of the walls. 
 
 These visual anchors that are still on the board are even more useful when participation is encouraged. The terminology and scope can be expanded as those present contribute to the refinement process. This interactive part is where the diagram really comes into its own. Use it as others expand on your ideas and provide alternatives. When questions are asked, point back to the relevant elements as you answer. You may even find yourself drawing more elements or just pointing as others talk and refine your explanation.
 
@@ -115,16 +115,16 @@ In our office Friday at 3pm is "This is my picture" time.
 
 ## FAQ
 
-Q. What about having multiple people working together on a board?
-A. This is ok for a discussion between two people but is confusing for a group. Try to avoid unless the two presenters have a good collaborative presentation style. You're telling a story after all.
+**Q**. What about having multiple people working together on a board?  
+**A**. This is ok for a discussion between two people but is confusing for a group. Try to avoid unless the two presenters have a good collaborative presentation style. You're telling a story after all.
 
-Q. What about remote teams / individuals?
-A. Well sometimes we try to do it on hangouts and/or record it. This is _ok_. YMMV
+**Q**. What about remote teams / individuals?  
+**A**. Well sometimes we try to do it on hangouts and/or record it. This is _ok_. YMMV
 
-Q. What about digital / online tools
-A. Keen to hear about suggestions but these can be prohibitively expensive and clunky.
+**Q**. What about digital / online tools.   
+**A**. Keen to hear about suggestions but these can be prohibitively expensive and clunky.
 
-Q. Is this just for developers?
-A. Absolutely not. I've been trying to get more QAs, UX, Designers, Product people involved.
+**Q**. Is this just for developers?  
+**A**. Absolutely not. I've been trying to get more QAs, UX, Designers, Product people involved.
 
 
