@@ -22,8 +22,6 @@ author:
 
 ---
 
-<sub>_The below is from an internal memo I wrote on reducing batch size in pull requests_</sub>
-
 One of the things I find most interesting about my role these days is that I get to talk with such a wide variety of people across our engineering group and I get to hear various challenges that they face. As a result I get to observe common patterns and themes that emerge which often stem from similar issues. I’d like to talk about one of those common issues - Batch Size.
 
 ### My experience
