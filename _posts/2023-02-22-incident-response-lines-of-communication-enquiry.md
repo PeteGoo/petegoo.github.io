@@ -99,7 +99,7 @@ Now you want to think about less recent changes that may only be impacting now b
 > - It may be the first time a certain type of scheduled activity has run since a change.
 > - It could be that we have just scaled out our cluster since a change to the machine images, configuration, code.
 
-Lastly it's a good idea to think about adjacencies. You never know when you might that extra context is going to challenge your assumptions.
+Lastly it's a good idea to think about adjacencies. You never know when you might benefit from that extra context which is going to challenge your assumptions.
 
 
 > 6. What else could be affected?
