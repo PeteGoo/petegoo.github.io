@@ -22,7 +22,7 @@ author:
 
 ---
 
-Over the last 9 years I've been involved in a lot of incident response activity and subsequent post-mortems or post-incident reviews (a good thing). I'm always incredibly interested in the behaviours of incident responders and just how difficult it is to remember all the right things to do when you are the one sitting in the hot seat.
+Over the last decade or more I've been involved in a lot of incident response activity and subsequent post-mortems or post-incident reviews (a good thing). I'm always incredibly interested in the behaviours of incident responders and just how difficult it is to remember all the right things to do when you are the one sitting in the hot seat.
 
 At times I have seen first hand that frozen state where you forget how everything works and have no idea where to look for clues. At other times I've seen that all-too-common scenario where the incident response team is busy looking around, diagnosing, investigating but they have forgotten to tell anyone that there is an incident going on so that customers and stakeholders can be informed. 
 
