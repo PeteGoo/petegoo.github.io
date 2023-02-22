@@ -30,7 +30,7 @@ A few years ago I came to the realisation that there are two distinct lists that
 - Lines of Enquiry
 - Lines of Communication
 
-For me I put these in a wiki page that is easily at hand. Our incident response bot links to these pages so folks can easily find them when they think "Lines of what again?".
+I  decided to put these in a wiki page that is easily at hand. Our incident response bot links to these pages so folks can easily find them when they think "Lines of what again?".
 
 ### Lines of Enquiry
 
@@ -58,7 +58,7 @@ For us, this looks like:
 > - Have we just deployed some terraform changes?
 
 
-Next you want to think about any changes in traffic patterns 
+Next you want to think about any changes in traffic patterns. If we didn't change something explicitly, maybe the behaviour of our users has changed or we could be under some kind of volumetric attack.
 
 
 > 2. Has our traffic changed?
@@ -69,9 +69,10 @@ Next you want to think about any changes in traffic patterns
 > - Are we processing a large number of queued messages / workload A / workload B / workload C?
 
 
-It's a good idea to give them links to dashboards etc here.
+It's a good idea to give the readers links to dashboards etc here. Nobody wants to be messing around with subpar wiki search engines during an incident.
 
-Next up, it's always good to check if it's someone else's stuff that's broken
+Next up, it's always good to check if it's someone else's stuff that's broken. I've found that, as your site reliability grows, it becomes painfully obvious how terrible other people are at theirs. It is not uncommon to be the one to make someone else aware their stuff is fried.
+One of your best tools is DownDetector or, my personal favourite, just searching Twitter. 
 
 
 > 3. Has one of our partners had a fault?
@@ -85,7 +86,7 @@ Next up, it's always good to check if it's someone else's stuff that's broken
 > - Large networking providers? Commcast? BGP again?
 
 
-Then there's a list of things that can change without prompting by us
+Then there's a list of things that can change without any action by a human. 
 
 
 > 4. What could have been changed on us?
@@ -106,7 +107,7 @@ Now you want to think about less recent changes that may only be impacting now b
 Lastly it's a good idea to think about adjacencies. You never know when you might that extra context is going to challenge your assumptions.
 
 
-> 6. What else could be affected
+> 6. What else could be affected?
 > 
 > Look for clues from services with the same dependencies etc to see if they also have issues but are not producing alerts in the same way.
 
@@ -132,7 +133,7 @@ So here are some starting points for lines of communication.
 > 
 
 
-Hopefully these two lists will serve you well. Use them...
+Hopefully these two lists will serve you well. Remember that they are there, use them, and feed them regularly...
 
 - If you're in an incident, everything is burning and you don't know what to do - **Lines of Enquiry**
 - If you're in an incident and you get that horrible feeling that you forgot to do something - **Lines of Communication**
