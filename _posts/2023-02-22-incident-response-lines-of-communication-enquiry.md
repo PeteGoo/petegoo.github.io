@@ -131,3 +131,9 @@ So here are some starting points for lines of communication.
 > - Let them know they have a problem
 > 
 
+
+Hopefully these two lists will serve you well. Use them...
+
+- If you're in an incident, everything is burning and you don't know what to do - **Lines of Enquiry**
+- If you're in an incident and you get that horrible feeling that you forgot to do something - **Lines of Communication**
+- If you have a few spare minutes while you wait to see if something has had an impact - **Lines of Communication**
