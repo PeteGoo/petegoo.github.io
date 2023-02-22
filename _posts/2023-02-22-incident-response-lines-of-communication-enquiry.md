@@ -9,9 +9,9 @@ tags:
 - incidents
 - communication
 - incident commander
-status: draft
+status: publish
 type: post
-published: false
+published: true
 meta: {}
 author:
   login: petegoo
