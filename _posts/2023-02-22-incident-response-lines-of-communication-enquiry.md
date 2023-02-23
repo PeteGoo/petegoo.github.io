@@ -60,7 +60,7 @@ For us, this looks like:
 Next you want to think about any changes in traffic patterns. If we didn't change something explicitly, maybe the behaviour of our users has changed or we could be under some kind of volumetric attack.
 
 
-> 2. Has our traffic changed?
+> 2\. Has our traffic changed?
 > 
 > - Is there more traffic load?
 > - Are we seeing unusual load on certain endpoints?
@@ -73,7 +73,7 @@ Next up, it's always good to check if it's someone else's stuff that's broken. I
 One of your best tools is DownDetector or, my personal favourite, just searching Twitter. 
 
 
-> 3. Has one of our partners had a fault?
+> 3\. Has one of our partners had a fault?
 > - Is \<insert cloud vendor\> reporting issues?
 >   - \<link to their status page\>
 >   - Single AZ failure? Regional?
@@ -86,7 +86,7 @@ One of your best tools is DownDetector or, my personal favourite, just searching
 Then there's a list of things that can change without any action by a human. 
 
 
-> 4. What could have been changed on us?
+> 4\. What could have been changed on us?
 > - Could the SQL query optimizer have created a bad plan in the database that is impacting our query performance? Purge the worst plans.
 > - Could a scheduled maintenance job have kicked in?
 > - Could a container have recycled?
@@ -95,14 +95,14 @@ Then there's a list of things that can change without any action by a human.
 Now you want to think about less recent changes that may only be impacting now because of some confluence of events.
 
 
-> 5. Could this be the first time we have done this since a change?
+> 5\. Could this be the first time we have done this since a change?
 > - It may be the first time a certain type of scheduled activity has run since a change.
 > - It could be that we have just scaled out our cluster since a change to the machine images, configuration, code.
 
 Lastly it's a good idea to think about adjacencies. You never know when you might benefit from that extra context which is going to challenge your assumptions.
 
 
-> 6. What else could be affected?
+> 6\. What else could be affected?
 > 
 > Look for clues from services with the same dependencies etc to see if they also have issues but are not producing alerts in the same way.
 # Lines of Communication
