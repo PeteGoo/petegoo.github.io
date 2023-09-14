@@ -10,7 +10,7 @@ tags:
 - security
 status: publish
 type: post
-published: false
+published: true
 meta: {}
 author:
   login: petegoo
