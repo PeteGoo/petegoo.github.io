@@ -73,7 +73,7 @@ When I first started playing with Zero Trust I was using [oauth2-proxy](https://
 
 In AWS we typically host our applications behind an Application Load Balancer (ALB). This allows us to choose to run the application in a container or on an EC2 instance while at the same time scaling it out and offloading TLS and other concerns.
 
-A feature of the listener rules within an ALB are that you can specify that no traffic is allowed through unless it the client [has been authenticated via OIDC or Amazon Cognito](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-authenticate-users.html) (which in turn can support social login, SAML etc).
+A feature of the listener rules within an ALB are that you can specify that no traffic is allowed through unless the client [has been authenticated via OIDC or Amazon Cognito](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-authenticate-users.html) (which in turn can support social login, SAML etc).
 
 ![Diagram of a AWS ALB Architecture](/images/2023/aws-alb-rv-proxy.png)
 
@@ -84,7 +84,7 @@ A great benefit of this approach is that now AWS is responsible for patching and
 ### AWS Verified Access
 A newer service from AWS that abstracts all of the ALB configuration away so that you can deploy a private ALB and still proxy authenticated traffic through to your applications is [AWS Verified Access](https://aws.amazon.com/verified-access/). 
 
-This effectively allows you to do the same thing but you don't have to configure OIDC on each load balancer but can instead centrally configure that once. You can also use [Cedar](https://aws.amazon.com/blogs/opensource/using-open-source-cedar-to-write-and-enforce-custom-authorization-policies/) policies and device claims like MDM certificates to further implement your Zero Trust posture. The only downside here for me is the cost. AVA will cost at least US$200 / month / application whereas an ALB is only US$23 or so, depending on configuration and usage.
+This effectively allows you to do the same thing but you don't have to configure OIDC on each load balancer and instead can centrally configure that once. You can also use [Cedar](https://aws.amazon.com/blogs/opensource/using-open-source-cedar-to-write-and-enforce-custom-authorization-policies/) policies and device claims like MDM certificates to further implement your Zero Trust posture. The only downside here for me is the cost. AVA will cost at least US$200 / month / application whereas an ALB is only US$23 or so, depending on configuration and usage.
 
 ## Zero Trust Access Proxies in GCP
 In GCP you can implement something very similar using Google's [Identity Aware Proxy service](https://cloud.google.com/iap).
