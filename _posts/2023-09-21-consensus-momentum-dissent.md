@@ -28,6 +28,12 @@ As your team grows into many teams...guilds...chapters...or whatever (no judgeme
 
 The thing that tends to happen at this point is that consensus has become the order of the day.
 
+<p align="center">
+
+![consensus](/images/2023/football-odd-one-out.jpg)
+
+</p>
+
 There is this weird belief that consensus is a great thing to have in a group of people. I guess it is, but it only happens if the group is very, very small. Why? **Because instances of consensus trend towards zero as the size of the group increases**. 
 
 This is why many teams have discovered an alternative approach - **invert the problem and instead of chasing consensus, look for dissent**. If you look at the Netflix Culture and Valued Behaviours you will find this resonates with their behaviour of "Informed Captains"
