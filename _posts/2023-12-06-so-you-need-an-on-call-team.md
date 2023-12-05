@@ -35,6 +35,8 @@ You may further find that these failures are starting to cost you in terms of th
 
 You need an on-call team.
 
+![delboy mobile](/images/2023/delboy_mobile.jpg)
+
 # What is an on-call team?
 An on-call team is a group of people who are responsible for responding to production issues. They are the first line of defence when things go wrong. They are the people who are woken up in the middle of the night when your systems fail. They are the people who are responsible for restoring service to your customers.
 
