@@ -116,8 +116,10 @@ This is highly dependent on your specific product and team topology but here are
 
 At a previous company we would have an SRE team and a product specific team member paged for each incident.
 
-e.g.
+For example:
+
 Product 1 alert -> SRE + Product 1 team member alerted
+
 Product 2 alert -> SRE + Product 2 team member alerted
 
 Very rarely did we have overlapping incidents unless there was a cloud provider failure in which case we merged the incidents anyways.
