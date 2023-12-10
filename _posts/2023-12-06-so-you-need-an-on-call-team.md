@@ -111,7 +111,7 @@ This is highly dependent on your specific product and team topology but here are
 2. Rotations should preferably be in pairs. This is for psychological safety and to make sure that you have a copilot to help you out.
 3. Swaps will happen but you need to set some ground rules like no more than two weeks on-call for any individual.
 4. Handover rotations during the week, during working hours. Tuesday midday for example is good.
-5. Christmas and New Years needs special treatment. We would shorten this to 1 or 2 day rotations and make sure that people were not on-call on Christmas day or New Years day. 
+5. Christmas and New Years needs special treatment. We would shorten this to 1 or 2 day rotations and make sure that the inconvenience of being on for key days like Christmas day and New Years day was spread out. 
 6. Set expectations around taking a laptop everywhere you go and not drinking alcohol or partaking in other mind altering substances while on-call. 
 
 At a previous company we would have an SRE team and a product specific team member paged for each incident.
