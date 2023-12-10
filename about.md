@@ -15,9 +15,9 @@ redirect_from:
   - /contact/
 ---
 
-My name is Peter Goodman, I am a developer living in Auckland, New Zealand building software. My hometown is Londonderry in Northern Ireland and I spent about 6 years in Edinburgh, Scotland working in the financial sector before moving to New Zealand in 2007.
+My name is Pete Goodman, I am a software engineer and leader living in Auckland building products and teams. Originally from Derry, Northern Ireland, I spent about 6 years in Edinburgh, Scotland working in the financial sector before moving to New Zealand in 2007 where I worked for various software companies and startups. Lately I've been a VP of Engineering at [Pushpay](http://pushpay.com).
 
-I find myself moving mostly around Microsoft .Net, Domain Driven Design, DSL Tools Windows Communication Foundation and Workflow Foundation. I have spoken at Tech-Ed New Zealand on Workflow and Windows Server AppFabric as well as various meetups and community groups.
+I find myself thinking about how to build effective, motivated teams. I have spoken at conferences on Blameless Culture, DevOps, AWS, SRE, and Engineering Leadership.
 
 You can find my talks and slides referenced on my main web site at [petegoo.com](http://www.petegoo.com)
 
