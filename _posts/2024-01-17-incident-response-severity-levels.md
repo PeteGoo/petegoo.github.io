@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: "Incident Response Part 2: Severity Levels"
