@@ -64,7 +64,7 @@ What you are looking to end up with is a table much like the following:
     </tr>
   </thead>
   <tbody>
-    <tr style="border-bottom:1pt solid dark-grey;">
+    <tr style="border-bottom:1pt solid darkgrey;">
       <td><strong>Description</strong></td>
       <td>Internal Impact Only <br /><br /> No customers impacted</td>
       <td>Problems reported with non-core functions</td>
@@ -73,7 +73,7 @@ What you are looking to end up with is a table much like the following:
       <td>Affects large number of customers or a Top 10 customer <br /><br />Functionality severely impaired</td>
       <td>A serious event affecting most customers. <br /><br /> Generally unavailable <br /><br /> Impairs ability to perform key tasks <br /><br /> Security event e.g breach/disclosure</td>
     </tr>
-    <tr style="border-bottom:1pt solid dark-grey;">
+    <tr style="border-bottom:1pt solid darkgrey;">
       <td><strong>Typical Examples</strong></td>
       <td>-</td>
       <td>-</td>
@@ -82,7 +82,7 @@ What you are looking to end up with is a table much like the following:
       <td>-</td>
       <td>-</td>
     </tr>
-    <tr style="border-bottom:1pt solid dark-grey;">
+    <tr style="border-bottom:1pt solid darkgrey;">
       <td><strong>Response</strong></td>
       <td>-</td>
       <td>Inform Customer Success</td>
