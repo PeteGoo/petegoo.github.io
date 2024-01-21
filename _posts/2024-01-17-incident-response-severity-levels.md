@@ -65,30 +65,30 @@ What you are looking to end up with is a table much like the following:
   </thead>
   <tbody>
     <tr style="border-bottom:1pt solid darkgrey;">
-      <td><strong>Description</strong></td>
-      <td>Internal Impact Only <br /><br /> No customers impacted</td>
-      <td>Problems reported with non-core functions</td>
-      <td>Customer confusion to small subset of customers <br /><br /> Background jobs failing <br /><br /> Could become P2/P3</td>
-      <td>Issue affecting a small group of customers <br /><br /> Redundancy loss with no impact <br /><br />Security near-miss</td>
-      <td>Affects large number of customers or a Top 10 customer <br /><br />Functionality severely impaired</td>
+      <td style="border-right:1pt solid darkgrey;"><strong>Description</strong></td>
+      <td style="border-right:1pt solid darkgrey;">Internal Impact Only <br /><br /> No customers impacted</td>
+      <td style="border-right:1pt solid darkgrey;">Problems reported with non-core functions</td>
+      <td style="border-right:1pt solid darkgrey;">Customer confusion to small subset of customers <br /><br /> Background jobs failing <br /><br /> Could become P2/P3</td>
+      <td style="border-right:1pt solid darkgrey;">Issue affecting a small group of customers <br /><br /> Redundancy loss with no impact <br /><br />Security near-miss</td>
+      <td style="border-right:1pt solid darkgrey;">Affects large number of customers or a Top 10 customer <br /><br />Functionality severely impaired</td>
       <td>A serious event affecting most customers. <br /><br /> Generally unavailable <br /><br /> Impairs ability to perform key tasks <br /><br /> Security event e.g breach/disclosure</td>
     </tr>
     <tr style="border-bottom:1pt solid darkgrey;">
-      <td><strong>Typical Examples</strong></td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
+      <td style="border-right:1pt solid darkgrey;"><strong>Typical Examples</strong></td>
+      <td style="border-right:1pt solid darkgrey;">-</td>
+      <td style="border-right:1pt solid darkgrey;">-</td>
+      <td style="border-right:1pt solid darkgrey;">-</td>
+      <td style="border-right:1pt solid darkgrey;">-</td>
+      <td style="border-right:1pt solid darkgrey;">-</td>
       <td>-</td>
     </tr>
     <tr style="border-bottom:1pt solid darkgrey;">
-      <td><strong>Response</strong></td>
-      <td>-</td>
-      <td>Inform Customer Success</td>
-      <td>Inform Customer Success <br /><br /> Inform Engineering Leadership (VPE)</td>
-      <td>Inform Engineering Leadership (VPE+CTO) <br /><br /> Implement in-product notifications of issue</td>
-      <td>Executive Leadership Team<br /><br />Raise Status Page</td>
+      <td style="border-right:1pt solid darkgrey;"><strong>Response</strong></td>
+      <td style="border-right:1pt solid darkgrey;">-</td>
+      <td style="border-right:1pt solid darkgrey;">Inform Customer Success</td>
+      <td style="border-right:1pt solid darkgrey;">Inform Customer Success <br /><br /> Inform Engineering Leadership (VPE)</td>
+      <td style="border-right:1pt solid darkgrey;">Inform Engineering Leadership (VPE+CTO) <br /><br /> Implement in-product notifications of issue</td>
+      <td style="border-right:1pt solid darkgrey;">Executive Leadership Team<br /><br />Raise Status Page</td>
       <td>Notify Executive Leadership Team <br /><br />Notify Board<br /><br /></td>
     </tr>
   </tbody>
