@@ -51,11 +51,48 @@ Severity levels are very likely unique to your context. The best way to define t
 
 What you are looking to end up with is a table much like the following:
 
-| Severity | Sev 6 | Sev 5 | Sev 4 | Sev 3 | Sev 2 | Sev 1 | 
-|-------|-------|-------|-------|-------|-------|-------|
-|  **Description** | Internal Impact Only <br/><br/> No customers impacted | Problems reported with non-core functions| Customer confusion to small subset of customers <br/><br/> Background jobs failing <br/><br/> Could become Sev2/Sev3 | Issue affecting a small group of customers <br/><br/> Redundancy loss with no impact <br/><br/>Security near-miss|Affects large number of customers or a Top 10 customer <br/><br/>Functionality severely impaired|A serious event affecting most customers. <br/><br/> Generally unavailable <br/><br/> Impairs ability to perform key tasks <br/><br/> Security event e.g breach/disclosure |
-|**Typical Examples**| - | - | - | - | - | - |
-|**Response**| - | Inform Customer Success| Inform Customer Success <br/><br/> Inform Engineering Leadership (VPE) | Inform Engineering Leadership (VPE+CTO) <br/><br/> Implement in-product notifications of issue | Executive Leadership Team<br/><br/>Raise Status Page | Notify Executive Leadership Team <br/><br/>Notify Board<br/><br/> |
+<table>
+  <thead>
+    <tr style="border-bottom:1pt solid black;">
+      <th>Severity</th>
+      <th>Sev 6</th>
+      <th>Sev 5</th>
+      <th>Sev 4</th>
+      <th>Sev 3</th>
+      <th>Sev 2</th>
+      <th>Sev 1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1pt solid dark-grey;">
+      <td><strong>Description</strong></td>
+      <td>Internal Impact Only <br /><br /> No customers impacted</td>
+      <td>Problems reported with non-core functions</td>
+      <td>Customer confusion to small subset of customers <br /><br /> Background jobs failing <br /><br /> Could become P2/P3</td>
+      <td>Issue affecting a small group of customers <br /><br /> Redundancy loss with no impact <br /><br />Security near-miss</td>
+      <td>Affects large number of customers or a Top 10 customer <br /><br />Functionality severely impaired</td>
+      <td>A serious event affecting most customers. <br /><br /> Generally unavailable <br /><br /> Impairs ability to perform key tasks <br /><br /> Security event e.g breach/disclosure</td>
+    </tr>
+    <tr style="border-bottom:1pt solid dark-grey;">
+      <td><strong>Typical Examples</strong></td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    <tr style="border-bottom:1pt solid dark-grey;">
+      <td><strong>Response</strong></td>
+      <td>-</td>
+      <td>Inform Customer Success</td>
+      <td>Inform Customer Success <br /><br /> Inform Engineering Leadership (VPE)</td>
+      <td>Inform Engineering Leadership (VPE+CTO) <br /><br /> Implement in-product notifications of issue</td>
+      <td>Executive Leadership Team<br /><br />Raise Status Page</td>
+      <td>Notify Executive Leadership Team <br /><br />Notify Board<br /><br /></td>
+    </tr>
+  </tbody>
+</table>
 
 
 # How do I evaluate the Severity Level of an incident?
