@@ -26,6 +26,12 @@ author:
 
 ---
 
+Other parts of this series on Incident Response:
+
+1. [So you need an on-call team](https://blog.petegoo.com/2023/12/06/so-you-need-an-on-call-team/)
+2. Severity Levels (this article)
+3. [Incident Response Roles](https://blog.petegoo.com/2024/01/27/incident-response-roles/)
+
 In [Part 1](https://blog.petegoo.com/2023/12/06/so-you-need-an-on-call-team/) of this series we covered why you might need an on-call team. In this post we will cover how to define severity levels for incidents. This is crucial in order to understand the impact of the incident on your customers and your business. This in turn will help your on-call team, your leadership team, and the rest of the business understand how to respond and how to communicate the incident.
 
 
@@ -109,8 +115,8 @@ Failure to assess the severity level can result in substandard communication pro
 
 In future posts in this series we will cover:
 
+- Situation Reports
 - Incident Response Playbooks
-- Incident Response Roles
 - Reporting on Incidents
 - (Blameless) Postmortems
 - Paying people for on-call

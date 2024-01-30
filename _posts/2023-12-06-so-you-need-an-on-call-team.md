@@ -23,6 +23,12 @@ author:
 
 ---
 
+Other parts of this series on Incident Response:
+
+1. So you need an on-call team (this article)
+2. [Severity Levels](https://blog.petegoo.com/2024/01/17/incident-response-severity-levels/)
+3. [Incident Response Roles](https://blog.petegoo.com/2024/01/27/incident-response-roles/)
+
 As your product gains traction and expectations from customers increase, you may find that at some point things start failing. You see one or more of the following signs start to accumulate:
 
 1. You find out about issues from your customers, not your team or your own monitoring systems.
@@ -128,9 +134,8 @@ Very rarely did we have overlapping incidents unless there was a cloud provider 
 
 In future posts in this series we will cover:
 
+- Situation Reports
 - Incident Response Playbooks
-- Incident Response Roles
-- Incident Severity Levels
 - Reporting on Incidents
 - (Blameless) Postmortems
 - Paying people for on-call
