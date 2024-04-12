@@ -28,6 +28,7 @@ Other parts of this series on Incident Response:
 1. So you need an on-call team (this article)
 2. [Severity Levels](https://blog.petegoo.com/2024/01/17/incident-response-severity-levels/)
 3. [Incident Response Roles](https://blog.petegoo.com/2024/01/27/incident-response-roles/)
+4. [Situation Reports](https://blog.petegoo.com/2024/01/27/incident-response-sitreps/)
 
 As your product gains traction and expectations from customers increase, you may find that at some point things start failing. You see one or more of the following signs start to accumulate:
 
