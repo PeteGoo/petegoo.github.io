@@ -76,13 +76,12 @@ For a lot of folks who do not want the maximum amount of detail joining the Slac
 The best way I have found of doing this is to have an `#incidents` channel where SitReps and notifications of new Incidents are broadcast to anyone that cares. In turn they can enable all notifications for that channel to get high level updates any time a new incident appears or there is a significant update.
 
 # Conclusion
-Situation Reports have become a non-negotiable part of my Incident Response process. They provide a structured way to provide updates to the team and stakeholders and ensure that everyone is on the same page. They are a great way to keep the team focused and to ensure that the Incident Commander is not constantly interrupted with questions, especially when you include the next sitrep time as you are essentially managing stakeholder expectations.
+Situation Reports have become a non-negotiable part of my Incident Response process. They provide a structured way to provide updates to the team and stakeholders and ensure that everyone is on the same page. They are a great way to keep the team focused and to ensure that the Incident Commander is not constantly interrupted with questions, especially when you include the next sitrep time to manage stakeholder expectations.
 
 # Future Posts
 
 In future posts in this series we will cover:
 
-- Situation Reports
 - Incident Response Playbooks
 - Reporting on Incidents
 - (Blameless) Postmortems

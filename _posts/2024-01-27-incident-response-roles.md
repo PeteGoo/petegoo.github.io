@@ -33,6 +33,7 @@ Other parts of this series on Incident Response:
 1. [So you need an on-call team](https://blog.petegoo.com/2023/12/06/so-you-need-an-on-call-team/)
 2. [Severity Levels](https://blog.petegoo.com/2024/01/17/incident-response-severity-levels/)
 3. Incident Response Roles (this article)
+4. [Situation Reports](https://blog.petegoo.com/2024/01/27/incident-response-sitreps/)
 
 In this, the 3rd part of the series on Incident Response, we're going to cover arguably one of the most important aspects of incident response teams and that is distinguishing the roles that responders should assume.
 
