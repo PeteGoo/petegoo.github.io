@@ -73,7 +73,7 @@ A great trick is to also pin/bookmark the SitRep to the channel so that it is ea
 # Broadcasting SitReps
 For a lot of folks who do not want the maximum amount of detail joining the Slack channel can be a step too far. Even worse, they may not know where the channel is or what it is called. In these cases it is a good idea to broadcast the SitRep to a wider audience. 
 
-The best way I have found of doing this is to have a `#incidents` channel where SitReps and notifications of new Incidents are broadcast to anyone that cares. In turn they can enable all notifications for that channel to get high level updates any time a new incident appears or there is a significant update.
+The best way I have found of doing this is to have an `#incidents` channel where SitReps and notifications of new Incidents are broadcast to anyone that cares. In turn they can enable all notifications for that channel to get high level updates any time a new incident appears or there is a significant update.
 
 # Conclusion
 Situation Reports have become a non-negotiable part of my Incident Response process. They provide a structured way to provide updates to the team and stakeholders and ensure that everyone is on the same page. They are a great way to keep the team focused and to ensure that the Incident Commander is not constantly interrupted with questions, especially when you include the next sitrep time as you are essentially managing stakeholder expectations.
