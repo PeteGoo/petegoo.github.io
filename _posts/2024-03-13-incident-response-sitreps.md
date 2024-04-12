@@ -38,7 +38,7 @@ Incident Response career and that is Situation Reports or SitReps.
 
 ![Blue Screen of Death  ](/images/2024/bsod.jpg)
 
-I happened to be attending an online session by [Brent Chapman](https://greatcircle.com/), who at the time was leading Incident Response at Slack. He was giving a talk if I remember correctly on his experience performing Incident Commander at Slack, Google, and the Burning Man festival. He mentioned the signifance of Situation Reports and it made me realise that I hadn't been consistent in the format of our Incident status updates and, to be honest, it was hurting us.
+A few years ago I happened to be attending an online session by [Brent Chapman](https://greatcircle.com/), who at the time was leading Incident Response at Slack. He was giving a talk if I remember correctly on his experience performing Incident Commander at Slack, Google, and the Burning Man festival. He mentioned the signifance of Situation Reports and it made me realise that I hadn't been consistent in the format of our Incident status updates and, to be honest, it was hurting us.
 
 # The need for SitReps
 Using Slack channels and video calls for incident response is great but a lot of us will have experienced the scenario where you join a Slack channel or video call for an ongoing incident and you want to ask "Can I get a summary of where we are at?". It's awkward because you know you have to interrupt whatever is being discussed to devote attention to getting you up to speed.
@@ -53,9 +53,9 @@ The below is a suggested template for SitReps. You can adjust it to suit your ne
 
 > ⚠️ **Situation Report** ⚠️ <br/>
 > **Summary**: Short single line description of the incident<br/>
-> **Severity**: Sev2<br/>
+> **Severity**: [Sev2](https://blog.petegoo.com/2024/01/17/incident-response-severity-levels/)<br/>
 > **Status**: Assessing/Stabilised/Mitigated/Resolved<br/>
-> **IC**: @PeteGoo<br/>
+> **IC**: [@PeteGoo](https://blog.petegoo.com/2024/01/27/incident-response-roles/)<br/>
 > **Responders**: @JoeBloggs, @JaneDoe<br/> 
 > **Actions**: <br/>
 > Have ruled out network issues<br/>
@@ -64,8 +64,9 @@ The below is a suggested template for SitReps. You can adjust it to suit your ne
 > Pete is notifying stakeholders<br/>
 > **Next SitRep**: 3:15pm
 
-
 In this way we can give anybody that is scrolling through the channel a quick summary of the current status, actions being performed, who to contact, and when the next update will be.
+
+Try to cover off those common questions that will be asked like what you have ruled out and what you are doing now. Do be careful however, I've seen teams use that "Actions" section to keep appending more and more context as the incident goes on. It needs to be concise and to the point, like less than 8 lines. If you need to provide more detail then consider a separate document or a Slack canvas.
 
 A great trick is to also pin/bookmark the SitRep to the channel so that it is easily accessible to anyone who joins.
 
