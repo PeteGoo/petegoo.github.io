@@ -116,7 +116,6 @@ Failure to assess the severity level can result in substandard communication pro
 
 In future posts in this series we will cover:
 
-- Situation Reports
 - Incident Response Playbooks
 - Reporting on Incidents
 - (Blameless) Postmortems

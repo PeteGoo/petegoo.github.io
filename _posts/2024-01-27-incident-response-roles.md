@@ -128,7 +128,6 @@ This is a very important role. If you have a Customer Success team then they sho
 
 In future posts in this series we will cover:
 
-- Situation Reports
 - Incident Response Playbooks
 - Reporting on Incidents
 - (Blameless) Postmortems

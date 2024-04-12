@@ -135,7 +135,6 @@ Very rarely did we have overlapping incidents unless there was a cloud provider 
 
 In future posts in this series we will cover:
 
-- Situation Reports
 - Incident Response Playbooks
 - Reporting on Incidents
 - (Blameless) Postmortems
