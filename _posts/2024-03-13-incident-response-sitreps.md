@@ -56,7 +56,7 @@ The below is a suggested template for SitReps. You can adjust it to suit your ne
 > **Severity**: [Sev2](https://blog.petegoo.com/2024/01/17/incident-response-severity-levels/)<br/>
 > **Status**: Assessing/Stabilised/Mitigated/Resolved<br/>
 > **IC**: [@PeteGoo](https://blog.petegoo.com/2024/01/27/incident-response-roles/)<br/>
-> **Responders**: @JoeBloggs, @JaneDoe<br/> 
+> **Responders**: \@JoeBloggs, \@JaneDoe<br/> 
 > **Actions**: <br/>
 > Have ruled out network issues<br/>
 > Joe is investigating recent releases to production to look for potential causes<br/>
